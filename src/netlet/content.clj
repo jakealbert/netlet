@@ -9,6 +9,32 @@
 
 (def site-title "Netlet")
 
+
+(def netlet-model-properties
+     {"prototype1" #{ {:outlet 1
+		       :switch-type :ssr}
+		      {:outlet 2
+		       :switch-type :analog} }
+      "prototype2" #{ {:outlet 1
+		       :switch-type :ssr}
+		      {:outlet 2
+		       :switch-type :triac}
+		      {:outlet #{3 4}
+		       :switch-type :analog} }
+      "build1"     #{ {:outlet #{1 2}
+		       :switch-type :ssr}
+		      {:outlet #{3 4}
+		       :switch-type :analog} }
+      "build2"     #{ {:outlet 1
+		       :switch-type :ssr}
+		      {:outlet #{2 3 4}
+		       :switch-type :analog} } })
+(def netlet-switch-properties
+     {:analog       {:min-value 0 :max-value 1}
+      :ssr          {:min-value 0 :max-value 255}
+      :triac        {:min-value 0 :max-value 255}})
+
+
 (def lipsum
      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus ligula et ipsum suscipit ut pharetra metus luctus. Duis vestibulum arcu in diam sollicitudin vulputate. Cras rhoncus consectetur mauris, sit amet molestie nisi volutpat sit amet. Cras dictum, tortor ac auctor feugiat, sapien ante elementum risus, ut placerat mi mauris at quam. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque bibendum eros at lectus congue non sodales lectus auctor. Nulla aliquet tortor id felis placerat tincidunt. Cras et mauris fringilla risus vestibulum tristique a ut eros. Integer sit amet ante sit amet odio laoreet faucibus sed id nisi. Proin lacus lorem, feugiat vel euismod sit amet, facilisis sed quam. In sed nulla quam. Vivamus interdum, mauris id consectetur varius, velit augue fringilla urna, quis dignissim quam est sit amet leo. Fusce est lacus, viverra in dictum in, dapibus vitae sapien. Phasellus eleifend magna eros, ac faucibus arcu. Mauris nisi libero, rutrum laoreet egestas sed, consectetur a dolor. Ut lobortis sapien eget turpis dictum non egestas odio mattis. Duis vehicula faucibus eros id accumsan.")
 
@@ -17,11 +43,73 @@
 (def widgets
      (list
       (struct-map section
+	:title "Welcome to Netlets!"
+	:body (fn [s p]
+		(html
+		 [:p "Netlets put you in control."]
+		 [:p "Netlets provide you with power."]
+		 [:p "Netlets let you control your power."]))
+	:section "overview"
+	:auth-level :logged-out)
+      (struct-map section
+	:title ""
+	:body (fn [s p]
+		[:img {:src "/images/product-image.png"
+		       :width "235"}])
+	:section "overview"
+	:position :right
+	:auth-level :logged-out)
+      (struct-map section
+	:title "Nerd Facts"
+	:body (fn [s p]
+		[:ul
+		 [:li "Powered by the ARM9260"]
+		 [:li "Near-real-time push communication over XMPP."]
+		 [:li "Industry-standard SSL ensures end-to-end encryption and security."]                                           [:li "WiFi model supports all standard authentication models: WEP, WPA-PSK, WPA2, WPA2 Enterprise."]])
+	:section "overview"
+	:position :right
+	:auth-level :logged-out)
+      (struct-map section
+	:title "What can I do with Netlets?"
+	:body (fn [s p]
+		(html
+		 [:ul
+		  [:li "Check the power consumption of the devices in your home from anywhere"]
+		  [:li "View your power and current usage history and find ``bad'' trends in your energy footprint."]
+		  [:li "Virtually ``unplug'' devices when you're not using them."]
+		  [:li "Create triggers based on time-of-day or change in current to change the state of any of your Netlet outlets."]
+		  [:li "``Unplug'' your monitor, printer, scanner, and speakers when your computer is asleep."]
+		  [:li "Dim your lights from your Android or iOS device."]]))
+	:section "overview"
+	:auth-level :logged-out)
+		  
+      (struct-map section
 	:title "My Netlets"
 	:body (fn [session params]
-		(html
-		 [:p.alt "You have no devices set up."]
-		 [:p [:a {:href "#"} "Add a Netlet"]]))
+		(let
+		    [user (@*users-map* (session :username))
+		     netlets (:netlets user)]
+		  (html
+		   (if netlets
+		     [:ul
+		      (map (fn [x] [:li 
+				    [:h4 (h (:name x)) " " [:a {:href (str "/delete-netlet/" (md5-sum (:name x)))} "[-]"] " " [:a {:href (str "/configure-netlet/" (md5-sum (:name x)))} "[edit]"]]
+				    [:ul
+				     (map (fn [y]
+					    [:li (h (:outlet-name (second y)))
+					     " "
+					     [:select {:name (str (first y))}
+					      (let [switch-props (netlet-switch-properties (:switch-type (second y)))
+						    min-val (:min-value switch-props)
+						    max-val (:max-value switch-props)]
+						(for [opt-val (range min-val max-val)]
+						  [:option {:value (str opt-val)} (str opt-val)]))]
+
+						       ])
+					  (reverse (seq (:config x))))]
+				    [:br]]) netlets)]
+		     [:p.alt "You have no devices set up."])
+		   [:p [:a {:href "/add-netlet"} "[+] Add a Netlet"]])))
 	:section "overview"
 	:auth-level :user)
       (struct-map section
@@ -40,42 +128,28 @@
 	:section "overview"
 	:auth-level :user)
       (struct-map section
-	:title "Top Artists"
+	:title "Power Usage History"
 	:body (fn [s p] [:div])
 	:section "charts"
-	:subsection #{"overview" "artist"})
+	:subsection #{"overview" "power"})
       (struct-map section
-	:title "Most Jammed"
+	:title "Current Draw History"
 	:body (fn [s p] [:div])
 	:section "charts"
-	:subsection #{"artist" "track"}
-	:position :right)
+	:subsection #{"overview" "current"})
       (struct-map section
-	:title "Top Tracks"
+	:title "Apparent Power History"
 	:body (fn [s p] [:div])
-	:section #{"charts" "tabs"}
-	:subsection #{"overview" "track"})
+	:section "charts"
+	:subsection #{"overview" "ap"}
+	:position :letf)
       (struct-map section
-	:title "Hyped Artists"
+	:title "Device Breakdown"
 	:body (fn [s p] [:div])
-	:section #{"charts" "tabs"}
-	:subsection #{"overview" "hyped-artist"}
+	:section "charts"
+	:subsection #{"overview" "devices"}
 	:position {"overview" :right
-		   "hyped-artist" :left})
-      (struct-map section
-	:title "Hyped Tracks"
-	:body (fn [s p] [:div])
-	:section "charts"
-	:subsection #{"overview" "hyped-track"}
-	:position {"overview" :right
-		   "hyped-track" :left})
-      (struct-map section
-	:title "Loved Tracks"
-	:body (fn [s p] [:div])
-	:section "charts"
-	:subsection #{"overview" "loved"}
-	:position {"overview" :right
-		   "loved" :left})
+		   "devices" :left})
       (struct-map section
 	:title {"overview" "Tracks"}
 	:body (fn [s p]
@@ -105,7 +179,9 @@
 	:body (fn [session params]
 		(html
 		 [:p (str session)]
-		 [:p (str params)]))
+		 [:p (if (params "password")
+		       (str (assoc params "password" "******"))
+		       (str params))]))
 	:position :right
 	:auth-level :admin)))
 
@@ -162,11 +238,10 @@
 			(tabbed-section session params 
 					(list
 					 (struct section "Overview" "overview")
-					 (struct section "Top Artists" "artist")
-					 (struct section "Hyped Artists" "hyped-artist")
-					 (struct section "Top Tracks" "track")
-					 (struct section "Hyped Tracks" "hyped-track")
-					 (struct section "Loved Tracks" "loved")) 
+					 (struct section "Current" "current")
+					 (struct section "Power" "power")
+					 (struct section "Apparent Power" "ap")
+					 (struct section "Devices" "devices"))
 					((var sections) "charts")))
 		:subsections
 		(let [calendar-description-fn (fn [s p]
@@ -191,42 +266,35 @@
 						  datestr))]
 		  {"overview" (struct-map section
 				:title "Overview"
-				:long-title "Weekly Artist, Track, and Tab Charts"
+				:long-title "Weekly Current, Power, and AP Charts"
 				:description overview-description-fn
 				:body (fn [session params] 
 					(widget-subsection
 					 session
 					 params widgets)))
-		   "artist"   (struct-map section
-				:title "Top Artists"
+		   "current"   (struct-map section
+				:title "Current Draw History"
 				:description calendar-description-fn
 				:body (fn [session params] 
 					(widget-subsection
 					 session
 					 params widgets)))
-		   "hyped-artist" (struct-map section 
-				   :title  "Hyped Artists" 
+		   "power"       (struct-map section
+				   :title "Power Usage History"
 				   :description calendar-description-fn
 				   :body (fn [session params] 
 					   (widget-subsection
 					    session
 					    params widgets)))
-		   "track"       (struct-map section
-				   :title "Top Tracks"
-				   :description calendar-description-fn
-				   :body (fn [session params] 
-					   (widget-subsection
-					    session
-					    params widgets)))
-		   "hyped-track"  (struct-map section
-				   :title "Hyped Tracks"
+		   "ap"  (struct-map section
+				   :title "Apparent Power History"
 				   :description calendar-description-fn
 				   :body  (fn [session params] 
 					   (widget-subsection
 					    session
 					    params widgets)))
-		   "loved"       (struct-map section
-				   :title "Loved Tracks"
+		   "devices"       (struct-map section
+				   :title "Device Breakdown"
 				   :description calendar-description-fn
 				   :body (fn [session params] 
 					   (widget-subsection
@@ -236,7 +304,103 @@
 		      "Admin"
 		      (fn [s p]
 			(full-section
-			 [:p "not implemented yet"])))
+			 [:p (map str @*users-map*)])))
+   "configure-netlet" (struct section
+		       "Configure"
+		       (fn [s p]
+			 (let [userdata (@*users-map* (s :username))
+			       usernetlets (:netlets userdata)
+			       netlet (first (filter (fn [x] (= (md5-sum (:name x)) (p "namehash"))) usernetlets))]
+			   
+			 (centered-section
+			  "Configure Netlet"
+			  [:div.prepend-6
+			   [:form {:method "post" :action "/configure-netlet"}
+			    [:p
+			     [:label {:for "name"} "Name:"]
+			     [:br]
+			     [:input {:name "name" :type "text" :size 30 :value (h (:name netlet))}]]
+			    (map (fn [y]
+				   (if (set? (:outlet y))
+				     (map (fn [z]
+					    [:p
+					     [:label {:for (str (h z))} (str "Outlet " (h z) " / " (:switch-type y) ":")]
+					     [:br]
+					     [:input {:name (str (h z)) :type "text"
+						      :value (if (:config netlet)
+							       (h (:outlet-name ((:config netlet) z)))
+							       "")
+						      :size 30}]])
+					  (:outlet y))
+				     [:p
+				      [:label {:for (str (h (:outlet y)))} (str "Outlet " (h (:outlet y)) " / " (:switch-type y) ":")]
+				      [:br]
+				      [:input {:name (str (h (:outlet y))) :type "text"
+					       :value (if (:config netlet)
+							(h (:outlet-name ((:config netlet) (:outlet y))))
+							"")
+					       :size 30}]]))
+				 (netlet-model-properties (:model netlet)))
+			    [:input {:type "hidden" :name "namehash" :value (p "namehash")}]
+			    [:input {:type "submit" :value "Save"}]]]))))
+   "login"    (struct section
+		      "Login"
+		      (fn [s p]
+			(centered-section
+			 "Come on in!"
+			 [:div.prepend-6
+			  [:form {:method "post" :action "/login"}
+			   [:p
+			    [:label {:for "name"} "Username / E-mail:"]
+			    [:br]
+			    [:input {:name "name" :type "text" :size 30}]]
+			   [:p
+			    [:label {:for "password"} "Password:"]
+			    [:br]
+			    [:input {:name "password" :type "password" :size 30 }]]
+			   [:p
+			    [:input {:type "submit" :value "Login"}]
+			    "  "
+			    [:a {:href "/register"} "Need an account?"]
+			    "."]]])))
+   "register" (struct section
+		      "Register"
+		      (fn [s p]
+			(centered-section
+			 "Join now!"
+			 [:div.prepend-6
+			  [:form {:method "post" :action "/register"}
+			   [:p
+			    [:label {:for "name"} "Username / E-mail:"]
+			    [:br]
+			    [:input {:name "name" :type "text" :size 30}]]
+			   [:p 
+			    [:label {:for "password"} "Password:"]
+			    [:br]
+			    [:input {:name "password" :type "password" :size 30}]]
+			   [:p
+			    [:input {:type "submit" :value "Register"}]]]])))
+   "add-netlet" (struct section
+			"Add Netlet"
+			(fn [s p]
+			  (centered-section
+			   "Add a new Netlet to your account."
+			   [:div.prepend-6
+			    [:form {:method "post" :action "/add-netlet"}
+			     [:p
+			      [:label {:for "name"} "Netlet Name:"]
+			      [:br]
+			      [:input {:name "name" :type "text" :size 30}]]
+			     [:p
+			      [:label {:for "model"} "Netlet Model:"]
+			      [:br]
+			      [:select {:name "model"}
+			       [:option {:value "prototype1"} "Prototype / 2 Outlets"]
+			       [:option {:value "prototype2"} "Prototype / 4 Outlets"]
+			       [:option {:value "build1"} "Netlet Home"]
+			       [:option {:value "build2"} "Netlet Air"]]]
+			     [:p
+			      [:input {:type "submit" :value "Create"}]]]])))
    "logout"   (struct section
 		      ""
 		      (fn [s p]
@@ -244,7 +408,7 @@
 			 "You are now logged out."
 			 [:p "&#8220;later dude.&#8221;"])))
   	   
- "users"     (struct-map section
+   "users"     (struct-map section
 		       :title "Users"
 		       :body (fn [s p]
 			       (let [userpage (p "userpage")]

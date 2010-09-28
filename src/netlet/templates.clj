@@ -18,7 +18,7 @@
 (def navigation-items
   (list
    (struct-map section
-       :title "My Netlets" 
+       :title "Netlets" 
        :body "overview"
        :auth-level :user)
    (struct-map section
@@ -109,7 +109,10 @@
   [session params widgets]
   (html
    [:div.tabsection.prepend-1.span-14.append-1.colborder
-    (map (fn [widget] (html [:div.box [:h3 (:title widget)] ((:body widget) session params)]))
+    (map (fn [widget] (html [:div.box 
+			    (if (not (= "" (:title widget)))
+			      [:h3 (:title widget)])
+			     ((:body widget) session params)]))
 	 (filter (fn [widget] (and (not (= (:position widget) :right))
 				   (in-section-for? (params "page")
 						    (params "subpage")
@@ -118,7 +121,10 @@
 				   (authorized-for? session widget)))
 		 widgets))]
    [:div.tabsection.span-7.last
-    (map (fn [widget] (html [:div.box [:h3 (:title widget)] ((:body widget) session params)]))
+    (map (fn [widget] (html [:div.box 
+			     (if (not (= "" (:title widget)))
+			       [:h3 (:title widget)])
+			     ((:body widget) session params)]))
 	 (filter (fn [widget] (and (= (:position widget) :right)
 				   (in-section-for? (params "page")
 						    (params "subpage")
@@ -501,7 +507,7 @@
      [:div#header
       [:div.container
        [:div#logo.span-16.prepend-top
-	[:h1 [:a {:href "/"} "Netlet: Network-Enabled Power Outlet"]]]
+	[:h1 [:a {:href "/"} "Netlets: Network-Enabled Power Outlets"]]]
        [:div#userbox.prepend-1.span-7.last.box
 	(let [logged-in (session :username)]
 	  (if logged-in
@@ -510,7 +516,10 @@
 	     [:a.userlink {:href (str "/users/" (session :username))} (session :username)]
 		". "
 		[:a {:href "/logout"} "Logout"])
-	    [:a {:href "/login/"} "Login"]))]
+	    (html
+	     [:a {:href "/login"} "Login"]
+	     " or "
+	     [:a {:href "/register"} "Register"])))]
        [:div#navbar.span-24.last1
 	[:ul
 	 (for [nav-item navigation-items
@@ -535,7 +544,7 @@
 			      (str "/" (:body footer-item)))}
 		  (:title footer-item)]))]
        [:div#copyright.span-24.last
-	"&copy; NetLet 2010. All rights reserved.  A "
+	"&copy; Netlets 2010. All rights reserved.  A "
 	[:a {:href "http://youbroughther.com"} "YBH"]
 	" Production."]]]]]))
        

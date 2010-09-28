@@ -4,6 +4,8 @@
 	[clj-time.coerce])
   (:require [clojure.contrib.str-utils2 :as s2]))
 
+(def *users-map* (ref {}))
+
 (defstruct section :title :body)
 
 (defn xor
@@ -25,7 +27,8 @@
 	user-auth-level (session :auth-level)
 	section-auth-level (section :auth-level)]
     (cond
-     (nil? user-auth-level)      (nil? section-auth-level)
+     (nil? user-auth-level)      (or (nil? section-auth-level)
+				     (= section-auth-level :logged-out))
      (= user-auth-level :user)   (or (nil? section-auth-level)
 				     (= section-auth-level :user))
      (= user-auth-level :admin)  (or (nil? section-auth-level)
@@ -113,9 +116,11 @@
   [name selected-date]
   (vec
     (concat
-     [:select {:name name
+     [:select.calendar {:name name
 	       :id name}]
     (get-calendar-select (get-calendar-dates (now)) selected-date))))
+
+
 
 (defn lastfm-date-to-dt
   [lastfm-date]
@@ -157,3 +162,7 @@
 	  (= dur-day 1) "1 Day Ago"
 	  :else (str dur-day " Days Ago"))))
        
+
+(defn flatten [x]
+  (let [s? #(instance? clojure.lang.Sequential %)]
+    (filter (complement s?) (tree-seq s? seq x))))
