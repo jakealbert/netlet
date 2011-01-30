@@ -22,10 +22,6 @@
        :body "overview"
        :auth-level :user)
    (struct-map section
-     :title "Triggers"
-     :body "triggers"
-     :auth-level :user)
-   (struct-map section
      :title "Charts"
      :body "charts"
      :auth-level :user)
@@ -41,7 +37,7 @@
    (struct section "Privacy Policy" "privacy-policy")
    (struct section "Contact Us" "contact")
    (struct section "Android/iPhone" "mobile")
-   (struct section "GitHub" "http://github.com/brockrockman/netlet")))
+   (struct section "GitHub" "http://github.com/jakealbert/netlet")))
 
 
 ;;;;;;;;;;;;;;;;;;;
@@ -62,7 +58,9 @@
      [:script {:type "text/javascript"
 	       :src "/js/selectToUISlider.jQuery.js"}]
      [:script {:type "text/javascript"
-	       :src "/js/tabsfm.js"}]
+	       :src "/js/highcharts.js"}]
+     [:script {:type "text/javascript"
+	       :src "/js/netlet.js"}]
      [:link {:type "text/css"
 	     :href "/css/redmond/jquery-ui-1.7.1.custom.css"
 	     :rel "stylesheet"}]
@@ -150,6 +148,7 @@
   [:div.span-18.last
     content])
 
+
 (defn widget-subsection
   [session params widgets]
   (html
@@ -198,6 +197,7 @@
 			      (nil? widget-title) nil
 			      (= widget-title "") nil
 			      (string? widget-title) [:h3 widget-title]
+			      (fn? widget-title) nil
 			      :else nil)
 		bodyout (if (nil? widget-title)
 			  [:div.box.subsection
@@ -218,6 +218,36 @@
 						    (:section widget)
 						    (:subsection widget))
 				   (authorized-for? session widget)))
+		 widgets))]))
+
+
+(defn widget-subsection-full
+  [session params widgets]
+  (html
+   [:div.widgetsubsection.span-18.append-1.last
+    (map (fn [widget]
+	   (let 
+	       [widget-title (:title widget)
+		widget-title (if (map? widget-title)
+			       (widget-title (params "subpage"))
+			       widget-title)
+		widget-title (cond
+			      (nil? widget-title) nil
+			      (= widget-title "") nil
+			      (string? widget-title) [:h3 widget-title]
+			      :else nil)
+		bodyout (if (nil? widget-title)
+			  [:div.box.subsection
+			   ((:body widget) session params)]
+			  [:div.box.subsection
+			   widget-title
+			   ((:body widget) session params)])]
+	     bodyout))
+	 (filter (fn [widget] (and   (in-section-for? (params "page")
+						      (params "subpage")
+						      (:section widget)
+						      (:subsection widget))
+				     (authorized-for? session widget)))
 		 widgets))]))
 
 (defn tabbed-section
@@ -513,13 +543,11 @@
 	  (if logged-in
 	    (html
 	     "Welcome, " 
-	     [:a.userlink {:href (str "/users/" (session :username))} (session :username)]
+	     [:a.userlink {:href (str "/users/" (session :username))} (h (session :username))]
 		". "
 		[:a {:href "/logout"} "Logout"])
 	    (html
-	     [:a {:href "/login"} "Login"]
-	     " or "
-	     [:a {:href "/register"} "Register"])))]
+	     [:a {:href "/login"} "Login/Register"])))]
        [:div#navbar.span-24.last1
 	[:ul
 	 (for [nav-item navigation-items
@@ -548,5 +576,4 @@
 	[:a {:href "http://youbroughther.com"} "YBH"]
 	" Production."]]]]]))
        
-
 

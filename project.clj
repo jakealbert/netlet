@@ -18,8 +18,11 @@
 		 [org.clojars.brockrockman/lastfm-bindings "1.0.0"]
 		 [clj-time "0.1.0-SNAPSHOT"]
 		 [org.clojars.sethtrain/postal "0.2.0"]
+		 [org.danlarkin/clojure-json "1.1"]
+		 [xmpp-clj "0.1.0"]
 		 [clojure-http-client "1.1.0-SNAPSHOT"]]
   :dev-dependencies [[swank-clojure "1.2.1"]]
   :namespaces [netlet]
   :compile-path "war/WEB-INF/classes"
-  :library-path "war/WEB-INF/lib")
+  :library-path "war/WEB-INF/lib"
+  :main netlet)

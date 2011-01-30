@@ -9,26 +9,42 @@
 
 (def site-title "Netlet")
 
+(def outlet-set (partial sorted-set-by (fn [x y] (< (:outlet x) (:outlet y)))))
 
 (def netlet-model-properties
-     {"prototype1" #{ {:outlet 1
-		       :switch-type :ssr}
-		      {:outlet 2
-		       :switch-type :analog} }
-      "prototype2" #{ {:outlet 1
-		       :switch-type :ssr}
-		      {:outlet 2
-		       :switch-type :triac}
-		      {:outlet #{3 4}
-		       :switch-type :analog} }
-      "build1"     #{ {:outlet #{1 2}
-		       :switch-type :ssr}
-		      {:outlet #{3 4}
-		       :switch-type :analog} }
-      "build2"     #{ {:outlet 1
-		       :switch-type :ssr}
-		      {:outlet #{2 3 4}
-		       :switch-type :analog} } })
+     {"prototype1" (outlet-set
+		    {:outlet 1
+		     :switch-type :analog}
+		    {:outlet 2
+		     :switch-type :analog})
+      "prototype2" (outlet-set
+		    {:outlet 1
+		     :switch-type :analog}
+		    {:outlet 2
+		     :switch-type :analog}
+		    {:outlet 3
+		     :switch-type :analog}
+		    {:outlet 4
+		     :switch-type :analog})
+      "build1"     (outlet-set
+		    {:outlet 1
+		     :switch-type :ssr}
+		    {:outlet 2
+		     :switch-type :ssr}
+		    {:outlet 3
+		     :switch-type :analog}
+		    {:outlet 4
+		     :switch-type :analog})
+      "build2"     (outlet-set
+		    {:outlet 1
+		     :switch-type :ssr}
+		    {:outlet 2
+		     :switch-type :ssr}
+		    {:outlet 3
+		     :switch-type :analog}
+		    {:outlet 4
+		     :switch-type :analog})})
+
 (def netlet-switch-properties
      {:analog       {:min-value 0 :max-value 1}
       :ssr          {:min-value 0 :max-value 255}
@@ -84,7 +100,7 @@
 	:auth-level :logged-out)
 		  
       (struct-map section
-	:title "My Netlets"
+	:title (html "My Netlets " [:a {:href "/add-netlet"} "[+]"])
 	:body (fn [session params]
 		(let
 		    [user (@*users-map* (session :username))
@@ -93,43 +109,55 @@
 		   (if netlets
 		     [:ul
 		      (map (fn [x] [:li 
-				    [:h4 (h (:name x)) " " [:a {:href (str "/delete-netlet/" (md5-sum (:name x)))} "[-]"] " " [:a {:href (str "/configure-netlet/" (md5-sum (:name x)))} "[edit]"]]
+				    [:h4 (h (:name x)) " " [:a {:href (str "/configure-netlet/" (md5-sum (:name x)))} "[edit]"]]
 				    [:ul
 				     (map (fn [y]
-					    [:li (h (:outlet-name (second y)))
-					     " "
-					     [:select {:name (str (first y))}
-					      (let [switch-props (netlet-switch-properties (:switch-type (second y)))
-						    min-val (:min-value switch-props)
-						    max-val (:max-value switch-props)]
-						(for [opt-val (range min-val max-val)]
-						  [:option {:value (str opt-val)} (str opt-val)]))]
-
+					    [:li
+					     [:span (h (:outlet-name (second y)))
+					      " "
+					      [:a {:href (str "/triggers/" (md5-sum (:name x)) "/" (md5-sum (:outlet-name (second y))))} "[triggers]"]]
+					     [:form {:method "post" :action "/set-outlet"}
+					      [:select {:name "newvalue"}
+					       (let [switch-props (netlet-switch-properties (:switch-type (second y)))
+						     min-val (:min-value switch-props)
+						     max-val (:max-value switch-props)]
+						 (for [opt-val (range min-val (inc max-val))]
+						   (if (= opt-val (:value (second y)))
+						     [:option {:value (str opt-val) :selected "selected"} (str opt-val)]
+						     [:option {:value (str opt-val)} (str opt-val)])))]
+					      [:input {:type "hidden" :name "netlet" :value (md5-sum (:name x))}]
+					      [:input {:type "hidden" :name "outlet" :value (h (str (first y)))}]
+					      [:input {:type "submit" :value "Update"}]]
 						       ])
 					  (reverse (seq (:config x))))]
 				    [:br]]) netlets)]
-		     [:p.alt "You have no devices set up."])
-		   [:p [:a {:href "/add-netlet"} "[+] Add a Netlet"]])))
+		     [:p.alt "You have no devices set up."]))))
 	:section "overview"
 	:auth-level :user)
       (struct-map section
-	:title "Recent Power Usage"
+	:title "Power Usage Ticker"
 	:body (fn [session params]
-		[:ul
-		 [:li "current"]
-		 [:li "voltage"]
-		 [:li "apparent power"]])
+		[:div#chart-container
+		 ])
 	:section "overview"
 	:auth-level :user)
       (struct-map section
-	:title  "Recently Activated Triggers"
+	:title  "Recent Triggers"
 	:body (fn [s p]
-		[:p "Want more, eh?"])
+		[:p (str (try (Class/forName "javax.net.SocketFactory") (catch Exception e "no sockets")))])
 	:section "overview"
+	:position :right
 	:auth-level :user)
       (struct-map section
-	:title "Power Usage History"
-	:body (fn [s p] [:div])
+	:title (fn [] "Power Usage History" )
+	:long-tile ""
+	:body (fn [s p] [:div#power-chart-container {:style 
+						     (if (not= (p "subpage") "power")
+						       "width: 394px; height: 200px;"
+						       "width: 674px; height: 300px")}
+			 (if (not= (p "subpage") "power")
+			   [:img {:src "/charts/power.png?size=ss"}]
+			   [:img {:src "/charts/power.png"}])])
 	:section "charts"
 	:subsection #{"overview" "power"})
       (struct-map section
@@ -142,7 +170,7 @@
 	:body (fn [s p] [:div])
 	:section "charts"
 	:subsection #{"overview" "ap"}
-	:position :letf)
+	:position :left)
       (struct-map section
 	:title "Device Breakdown"
 	:body (fn [s p] [:div])
@@ -192,46 +220,6 @@
 		      ""
 		      (fn [session params]
 			(widget-section session params widgets)))
-   "songbook" (struct-map section
-		      :title "Songbook"
-		      :body (fn [session params]
-			      (let [user (session :lastfm-user)
-				    logged-in (and (:username user)
-						   (:key user))]
-				(if logged-in
-				  (tabbed-section session params
-						  (list
-						   (struct section
-							   "Library"
-							   "library")
-						   (struct section
-							   "Favorite Tracks"
-							   "favorites")
-						   (struct section
-							   "Songs in Gm"
-							   "songs-in-gm"))
-						  ((var sections) "songbook"))
-				  (centered-section "All the songs you play, all in one place." [:p "Songbook is your own collection of the tracks you love, the tabs you've written, and chords you're still learning.  Search your library for the by tuning, key, artists, or &#8220;jam count&#8221; with Smart Songbooks."]))))
-		      :subsections {"library" (struct section
-						      (fn [session p]
-							(str
-							 (:username
-							  (:lastfm-user session))
-							 "'s Library"))
-						      (fn [s p ]
-							"library"))
-				    "favorites" (struct section
-							(fn [session p]
-							  (str
-							   (:username
-							    (:lastfm-user session))
-							   "'s Favorite Tracks"))
-							(fn [s p]
-							  "favorites"))
-				    "songs-in-gm" (struct section
-							  "Songs in Gm"
-							  (fn [s p]
-							    "smart songbook"))})
      "charts"   (struct-map section
 		:title "Charts"
 		:body (fn [session params]
@@ -247,13 +235,21 @@
 		(let [calendar-description-fn (fn [s p]
 						(let [dt (now)
 						      pastsun (minus dt (days (day-of-week dt)))
-						      pastsun2 (minus pastsun (weeks 1))
+						      pastsun2 (minus pastsun (weeks 4))
 						      fmt (formatter "dd-MM-YYYY")
-						      datestr (str "For the week ending on "
-								   (html
-								    (get-calendar-html "enddate"
-										       (unparse fmt pastsun))) )]
-						  datestr))
+						      date1       (html
+								   (get-calendar-html "startdate"
+										      (unparse fmt pastsun2)))
+						      date2       (html
+								   (get-calendar-html "enddate"
+										      (unparse fmt pastsun)))]
+						 (html
+						  [:form {:method "POST" :action "#"}
+						   [:formset
+						    [:label {:for "startdate"} "From "]
+						    date1
+						    [:label {:for "enddate"} " to "]
+						    date2]])))
 		      overview-description-fn (fn [s p]
 						(let [dt (now)
 						      pastsun (minus dt (days (day-of-week dt)))
@@ -276,28 +272,28 @@
 				:title "Current Draw History"
 				:description calendar-description-fn
 				:body (fn [session params] 
-					(widget-subsection
+					(widget-subsection-full
 					 session
 					 params widgets)))
 		   "power"       (struct-map section
 				   :title "Power Usage History"
 				   :description calendar-description-fn
 				   :body (fn [session params] 
-					   (widget-subsection
+					   (widget-subsection-full
 					    session
 					    params widgets)))
 		   "ap"  (struct-map section
 				   :title "Apparent Power History"
 				   :description calendar-description-fn
 				   :body  (fn [session params] 
-					   (widget-subsection
+					   (widget-subsection-full
 					    session
 					    params widgets)))
 		   "devices"       (struct-map section
 				   :title "Device Breakdown"
 				   :description calendar-description-fn
 				   :body (fn [session params] 
-					   (widget-subsection
+					   (widget-subsection-full
 					    session
 					    params widgets)))}))
    "admin"    (struct section
@@ -313,13 +309,15 @@
 			       netlet (first (filter (fn [x] (= (md5-sum (:name x)) (p "namehash"))) usernetlets))]
 			   
 			 (centered-section
-			  "Configure Netlet"
+			  (html "Configure Netlet " 			   [:a {:href (str "/delete-netlet/" (p "namehash"))} "[-]"])
 			  [:div.prepend-6
+			   [:h3 (h (:name netlet))]
 			   [:form {:method "post" :action "/configure-netlet"}
+			    [:input {:name "name" :type "hidden" :size 30 :value (h (:name netlet))}]
 			    [:p
-			     [:label {:for "name"} "Name:"]
+			     [:label {:for "xmppid"} "XMPP ID:"]
 			     [:br]
-			     [:input {:name "name" :type "text" :size 30 :value (h (:name netlet))}]]
+			     [:input {:name "xmppid" :type "text" :size 30 :value (h (:xmpp netlet))}]]
 			    (map (fn [y]
 				   (if (set? (:outlet y))
 				     (map (fn [z]
@@ -343,6 +341,105 @@
 				 (netlet-model-properties (:model netlet)))
 			    [:input {:type "hidden" :name "namehash" :value (p "namehash")}]
 			    [:input {:type "submit" :value "Save"}]]]))))
+   "triggers" (struct-map section
+		      :title "Outlet Triggers"
+		      :auth-level :user
+		      :body (fn [s p]
+			      (let [userdata (@*users-map* (s :username))
+				    usernetlets (:netlets userdata)
+				    netlet (first (filter (fn [x] (= (md5-sum (:name x)) (p "namehash"))) usernetlets))
+				    netletname (:name netlet)
+				    configs (vals (:config netlet))
+				    outlet (first (filter (fn [x] (= (md5-sum (:outlet-name x)) (p "outlethash"))) configs))
+				    outletnum (first (first (filter (fn [x] (= (md5-sum (:outlet-name (second x))) (p "outlethash"))) (seq (:config netlet)))))
+				    outletname (:outlet-name outlet)]
+				(centered-section
+				 (html (str (h outletname) " Triggers ")
+				       [:a {:href (str "/add-trigger/"
+						       (p "namehash")
+						       "/"
+						       (p "outlethash")) } "[+]"])
+				 [:div.prepend-1
+				  [:ul
+				   (for [trigger  (filter (fn [x] (and
+								   (= (:netlet x) (p "namehash"))
+								   (= (:outlet x) outletnum)))
+							  (:triggers userdata))]
+				     (let [triggernetlet (first (filter (fn [x] (= (md5-sum (:name x)) (:trigger-netlet trigger))) usernetlets))
+					   triggernname (:name triggernetlet)
+					   triggeroutlet ((:config triggernetlet) (:trigger-outlet trigger))
+					   triggeroname (:outlet-name triggeroutlet)]
+				       [:li 
+					"Turn this outlet "
+					(if (> (:newval trigger) 0) [:strong "on"] [:strong "off"])
+					" when "
+					[:strong triggernname]
+					"/"
+					[:strong triggeroname]
+					" spikes "
+					(if (= :rising (:edge trigger)) [:strong "up"] [:strong "down"])
+					". "
+					[:a {:href (str "/delete-trigger/" (md5-sum (str (:netlet trigger)
+										       (:outlet trigger)
+										       (:trigger-netlet trigger)
+										       (:trigger-outlet trigger)
+										       (:edge trigger))))} "[-]"]]))]]))))
+   "add-trigger" (struct-map section
+		   :title "New Outlet Trigger"
+		   :auth-level :user
+		   :body (fn [s p]
+			      (let [userdata (@*users-map* (s :username))
+				    usernetlets (:netlets userdata)
+				    netlet (first (filter (fn [x] (= (md5-sum (:name x)) (p "namehash"))) usernetlets))
+				    netletname (:name netlet)
+				    configs (vals (:config netlet))
+				    outlet (first (filter (fn [x] (= (md5-sum (:outlet-name x)) (p "outlethash"))) configs))
+				    outletname (:outlet-name outlet)]
+				(centered-section
+				 (str "New " (h outletname) " Trigger")
+				 [:div.prepend-1
+				  [:form {:method "post" :action "/add-trigger"}
+				   [:p
+				    "Turn this outlet "
+				    [:select {:name "onoff"}
+				     [:option {:value "on"} "on"]
+				     [:option {:value "off"} "off"]]
+				    " when "
+				    [:select {:name "outlet"}
+				     
+				       (let [othernetlets (filter
+							   (fn [ntl]
+							     (not (empty?
+								   (filter
+								    (fn [otl]
+								      (not= (:outlet-name otl) outletname))
+								    (vals (:config ntl))))))
+							   usernetlets)]
+					 (for [anetlet othernetlets]
+					   (html
+					    [:optgroup {:label (:name anetlet)}
+					     (for [aoutlet (sort (filter
+								  (fn [x]
+								    (not= x outletname))
+								  (map :outlet-name (vals (:config anetlet)))))]
+					       (html
+						[:option {:value (str (md5-sum (:name anetlet)) (md5-sum aoutlet))} aoutlet]))])))]
+				    " turns "
+				    [:select {:name "triggeronoff"}
+				     [:option {:value "on"} "on"]
+				     [:option {:value "off"} "off"]]
+				    "."
+				    ]
+				   [:p
+				    [:input {:name "namehash"
+					     :type "hidden"
+					     :value (p "namehash")}]
+				    [:input {:name "outlethash"
+					     :type "hidden"
+					     :value (p "outlethash")}]
+				    [:input {:name "submit"
+					     :type "submit"
+					     :value "Add Trigger"}]]]]))))
    "login"    (struct section
 		      "Login"
 		      (fn [s p]
@@ -463,72 +560,19 @@
 				 (fn [s p]
 				   (full-section
 				    [:div.box 
-				     [:h2 "User Agreement"]
-				     [:hr]
-				     [:p "Last Revised June 26 2010"]
-				     [:p "The following User Agreement (\"Agreement\") governs the use of www.tabs.fm (\"Website\"), including without limitation participation in its bulletin boards, forums, personal ads, chats, and all other areas (except to the extent stated otherwise on a specific page) as provided by You Brought Her Productions. (\"Service Provider,\" \"we,\" or \"our\")."]
-				     [:p "Please read the rules contained in this Agreement carefully.  You can access this Agreement any time at "
-				      [:a {:href "http://tabs.fm/user-agreement"} "http://tabs.fm/user-agreement"]
-				      ". "
-				      [:strong "Your use of and/or registration on any aspect of the Website will constitute your agreement to comply with these rules."]
-				      " If you cannot agree with these rules, please do not use the Website."]
-				     [:p "In addition to reviewing this Agreement, please read our "
-				      [:a {:href "http://tabs.fm/privacy-policy"} "Privacy Policy"]
-				      ". Your use of the Website constitues agreement to its terms and conditions as well."]
-				     [:p "The Agreement may be modified from time to time; the date of the most recent revision will appear on this page, so check back often.  Continued access of the Website by you will constitute your acceptance of any changes or revisions to the Agreement."]
-				     [:p "Your failure to follow these rules, whether listed below or in bulletins posted at various points in the Website, may result in suspension or termination of your access to the Website, without notice, in addition to Service Provider's other remedies."]
-				     [:h3 "Monitoring"]
-				     [:p "We strive to provide an enjoyable online experience for our users, so we may monitor activity on the Website, including in the bulletin boards, forums, personal ads, and chats, to foster compliance with this Agreement.  All users of the Website hereby specifically agree to such monitoring.  Nevertheless, we do not make any warranties or guarantees that: (1) the Website, or any portion thereof, will be monitored for accuracy or unacceptable use, (2) apparent statements of fact will be authenticated, or (3) we will take any specific action (or any action at all) in the event of a dispute regarding compliance or non-compliance with this Agreement"]
-				     [:h3 "Medical Information Disclaimer"]
-				     [:h3 "Registration and Account Creation"]
-				     [:h4 "Registration Information:"]
-				     [:h4 "Use of User ID/Password"]
-				     [:h4 "Fees and Payments"]
-				     [:h3 "Rules of Usage"]
-				     [:h4 "Use of the Service by You"]
-				     [:h4 "Comments by Others Are Not Endorsed by Service Provider"]
-				     [:h4 "User of Material Supplied by You:"]
-				     [:h4 "Copyright Complaints:"]
-				     [:h4 "Merchandise Sold ON OR THROUGH the Website:"]
-				     [:h4 "Indemnification:"]
-				     [:h4 "Editing and Deletions:"]
-				     [:h4 "Additional Rules:"]
-				     [:h4 "Disclaimer of Warranty and Limitation of Liability:"]
-				     [:h4 "Termination or Suspension of Access to the Website:"]
-				     [:h4 "Jurisdiction:"]
-				     [:h4 "Auctions:"]
-				     [:h4 "Associated Press:"]
-				     [:h4 "Mobile Terms and Conditions"]])))
+				     [:h2 "User Agreement"]])))
    "privacy-policy"      (struct section
 				 "Privacy Policy"
 				 (fn [s p]
 				   (full-section
 				    [:div.box
-				     [:h2 "Privacy Policy"]
-				     [:hr]
-				     [:p "Last Revised June 26 2010"]
-				     [:p "The following Privacy Policy summarizes the various ways that You Brought Her Productions (\"Service Provider,\" \"we,\" or \"our\") treats the information you provide while using www.tabs.fm (\"Website\").  It is our goal to bring you information that is tailored to your individual needs and, at the same time, protect your privacy."]
-				     [:p "Please read this Privacy Policy carefully.  You can access the Privacy Policy at any time at "
-				      [:a {:href "http://tabs.fm/privacy-policy"} "http://tabs.fm/privacy-policy"]
-				      ". "
-				      [:strong "Your use of and/or registration on any aspect of the Website will constitute your agreement to this Privacy Policy."]
-				      " If you cannot agree with the terms and conditions of this Privacy Policy, please do not use the Website.  This Privacy Policy does not cover information collected elsewhere, including without limitation offline and on sites linked to from the Website."]
-				     [:p "In addition to reviewing this Privacy Policy, please read our "
-				      [:a {:href "http://tabs.fm/user-agreement"} "User Agreement"]
-				      ". Your use of the Website constitues agreement to its terms and conditions as well."]
-				     [:p "The Privacy Policy may be modified from time to time; the date of the most recent revision will appear on this page, so check back often.  Continued access of the Website by you will constitute your acceptance of any changes or revisions to the privacy Policy."]
-				     [:h3 "The Type of Information the Website Collects"]
-				     [:h3 "How the Website Uses Information Provided by You"]
-				     [:h3 "Cookies"]
-				     [:h3 "Information Security and Notification"]
-				     [:h3 "Kids and Parents"]
-				     [:h3 "Privacy Policy Coordinator"]])))
+				     [:h2 "Privacy Policy"]])))
    "contact"  (struct section
 		      "Contact Us"
 		      (fn [s p]
 			(centered-section
 			 "Contact Us"
-			 [:p "not implemented yet"])))
+			 [:p ""])))
    
    "bummer"   (struct section
 		      "404.  Say Wha?"

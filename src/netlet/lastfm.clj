@@ -5,15 +5,11 @@
   (:import (java.io Reader InputStream InputStreamReader ByteArrayInputStream IOException))
   (:import (java.security NoSuchAlgorithmException MessageDigest)
 	   (java.math BigInteger))
-  (:import (net.roarsoftware.lastfm.scrobble Scrobbler Source))
-  (:import (net.roarsoftware.lastfm Caller Authenticator Session Radio Radio$RadioStation))
   (:require [clojure.xml :as xml])
   (:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter.xml :as zf])
   (:require [clojure-http.resourcefully :as res]))
 
-(.setUserAgent (Caller/getInstance) "clj")
-(.setDebugMode (Caller/getInstance) false)
 (def apikey  "95bbfb880f3495a0f13f4d29b524d4ef")
 (def secret  "202ed3f4a070b39a4595db7e6e9758fb")
 

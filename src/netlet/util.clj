@@ -76,16 +76,17 @@
 ;; DATE SELECTION/CALENDAR FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn unixtime
+  [dt]
+  (* 1000 (in-secs (interval (epoch) dt))))
+
 (defn get-calendar-select
   [alod selected-date] 
   (if (empty? alod)
     '()
     (cons [:optgroup {:label (str (year (first alod)))}
 	   (map (fn [dt] 
-		  (let [option-attrs {:value (unparse
-					      (formatter
-					       "dd-MM-YYYY")
-					      dt)}
+		  (let [option-attrs {:value (unixtime dt)}
 			option-attrs (if (= (unparse (formatter "dd-MM-YYYY")
 						     dt)
 					    selected-date)
@@ -105,20 +106,23 @@
 (defn get-calendar-dates
   ([now-dt] (get-calendar-dates (minus now-dt (days (day-of-week now-dt))) '()))
   ([enddate acc]
-     (let [startdate (date-time 2005 2 20)]
+     (let [startdate (date-time 2010 6 01)]
        (if (after? enddate startdate)
 	 (get-calendar-dates
 	  (minus enddate (weeks 1))
 	  (cons enddate acc))
 	 acc))))
 
+
+
 (defn get-calendar-html
   [name selected-date]
   (vec
     (concat
      [:select.calendar {:name name
-	       :id name}]
-    (get-calendar-select (get-calendar-dates (now)) selected-date))))
+			:id name
+		        :style "width: auto !important"}]
+     (get-calendar-select (get-calendar-dates (now)) selected-date))))
 
 
 
@@ -162,7 +166,10 @@
 	  (= dur-day 1) "1 Day Ago"
 	  :else (str dur-day " Days Ago"))))
        
-
 (defn flatten [x]
   (let [s? #(instance? clojure.lang.Sequential %)]
     (filter (complement s?) (tree-seq s? seq x))))
+
+(defn get-now
+  []
+  (* 1000 (in-secs (interval (epoch) (now)))))
