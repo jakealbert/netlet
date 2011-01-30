@@ -3,7 +3,6 @@
   :repositories {"incanter" "http://repo.incanter.org"}
   :dependencies [[compojure "0.4.0-RC3"]
                  [org.clojars.abedra/hiccup "0.2.5"]
-		 [cssgen "0.2.1"]
 		 [org.clojure/clojure-contrib "1.0-SNAPSHOT"]
 		 [org.incanter/incanter-full "1.0.0"]
                  [ring/ring-servlet "0.2.1"]
@@ -15,7 +14,6 @@
 		 [appengine-local-runtime "1.3.3.1"]
 		 [appengine-testing "1.3.3.1"]
 		 [appengine-tools-api "1.3.3.1"]
-		 [org.clojars.brockrockman/lastfm-bindings "1.0.0"]
 		 [clj-time "0.1.0-SNAPSHOT"]
 		 [org.clojars.sethtrain/postal "0.2.0"]
 		 [org.danlarkin/clojure-json "1.1"]
