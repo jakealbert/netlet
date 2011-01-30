@@ -1,10 +1,9 @@
 (ns netlet.lastfm
-  (:use compojure.core)
+  (:use compojure.core
+	[netlet.util :only [md5-sum]])
   (:require [clojure.contrib.str-utils2 :as s2])
   (:use [clojure-http.client])
   (:import (java.io Reader InputStream InputStreamReader ByteArrayInputStream IOException))
-  (:import (java.security NoSuchAlgorithmException MessageDigest)
-	   (java.math BigInteger))
   (:require [clojure.xml :as xml])
   (:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter.xml :as zf])
@@ -140,21 +139,6 @@
 				 (= (:size (:attrs tag)) size))]
 		  (first (:content tag))))))
        
-    
-(defn pad [n s]
-  (let [padding (- n (count s))]
-    (apply str (concat (apply str (repeat padding "0")) s))))
-
-(defn md5-sum
-  [#^String str]
-  (let [alg (doto (MessageDigest/getInstance "MD5")
-	      (.reset)
-	      (.update (.getBytes str)))]
-    (try
-     (pad 32 (.toString (new BigInteger 1 (.digest alg)) 16))
-     (catch NoSuchAlgorithmException e
-       (throw (new RuntimeException e))))))
-
 
 (defn auth_get-session
   [params]

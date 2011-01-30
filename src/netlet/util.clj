@@ -2,6 +2,8 @@
   (:use [clj-time.core]
 	[clj-time.format]
 	[clj-time.coerce])
+  (:import (java.security NoSuchAlgorithmException MessageDigest)
+	   (java.math BigInteger))
   (:require [clojure.contrib.str-utils2 :as s2]))
 
 (def *users-map* (ref {}))
@@ -13,6 +15,21 @@
   "Logical Two-Input Exclusive-OR"
   (or (and a (not b))
       (and b (not a))))
+
+    
+(defn pad [n s]
+  (let [padding (- n (count s))]
+    (apply str (concat (apply str (repeat padding "0")) s))))
+
+(defn md5-sum
+  [#^String str]
+  (let [alg (doto (MessageDigest/getInstance "MD5")
+	      (.reset)
+	      (.update (.getBytes str)))]
+    (try
+     (pad 32 (.toString (new BigInteger 1 (.digest alg)) 16))
+     (catch NoSuchAlgorithmException e
+       (throw (new RuntimeException e))))))
 
 
 ;;;;;;;;;;;;;;;

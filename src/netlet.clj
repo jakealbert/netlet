@@ -6,9 +6,8 @@
 		    ByteArrayInputStream))
   (:use [netlet.response :only [success not-found]]
 	[netlet.templates :only [layout]]
-	[netlet.lastfm :only [md5-sum]]
 	[netlet.content :only [site-title sections netlet-switch-properties netlet-model-properties]]
-	[netlet.util :only [section *users-map* flatten get-now]]
+	[netlet.util :only [section *users-map* flatten get-now md5-sum]]
 	[netlet.xmpp :only [*xmpp-connection* send-message-to get-xmpp-connection]]
 	[hiccup :only [html]]
 	[incanter core stats charts]
