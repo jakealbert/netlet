@@ -129,10 +129,15 @@
 	   (not (= (params "namehash") "")))
     (let [userdata (@*users-map* (session :username))
 	  usernetlets (:netlets userdata)
+	  usertriggers (:triggers userdata)
+	  filteredtriggers (filter (fn [x] (not (or (= (:trigger-netlet x) (params "namehash"))
+						    (= (:netlet x) (params "namehash")))))
+				   usertriggers)
 	  filterednetlets (filter (fn [x] (not (= (md5-sum (:name x))
 						  (params "namehash"))))
 				  usernetlets)
-	  newuserdata (assoc userdata :netlets filterednetlets)]
+	  newuserdata (assoc userdata :triggers filteredtriggers)
+	  newuserdata (assoc newuserdata :netlets filterednetlets)]
       (dosync
        (alter *users-map* assoc (session :username) newuserdata)
        (redirect "/overview")))
