@@ -67,21 +67,21 @@
 	  usernetlets (:netlets userdata)
 	  netletname (params "name")
 	  netletmodel (params "model")
+	  netletdne  (empty? (filter (fn [x] (= (:name x) netletname)) usernetlets))
+	  newnetlet   {:name netletname 
+		       :model netletmodel 
+		       :xmpp "netlet@jabber.org/device"
+		       :data (sorted-set-by (fn [a b] (< (:timestamp a)
+							 (:timestamp b))))}
 	  newuserdata (if usernetlets
-			(assoc userdata :netlets (cons {:name netletname 
-							:model netletmodel 
-							:xmpp "netlet@jabber.org/device"
-							:data (sorted-set-by (fn [a b] (< (:timestamp a)
-											  (:timestamp b))))}
+			(assoc userdata :netlets (cons newnetlet
 						       usernetlets))
-			(assoc userdata :netlets (cons {:name netletname 
-							:model netletmodel 
-							:xmpp "netlet@jabber.org/device"
-							:data (sorted-set-by (fn [a b] (< (:timestamp a)
-											  (:timestamp b))))} #{})))]
-      (dosync
-       (alter *users-map* assoc (session :username) newuserdata)
-       (redirect "/overview")))
+			(assoc userdata :netlets (cons newnetlet #{})))]
+      (if netletdne
+	(dosync
+	 (alter *users-map* assoc (session :username) newuserdata)
+	 (redirect "/overview"))
+	(redirect "/add-netlet")))
     (redirect "/login")))
 
 (defn create-trigger
