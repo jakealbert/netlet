@@ -1,8 +1,6 @@
 (ns netlet.content
-  (:use [netlet.lastfm]
-	[netlet.templates]
+  (:use [netlet.templates]
 	[netlet.util]
-	[netlet.tabsucker]
 	[clj-time.core]
 	[clj-time.format]
 	[hiccup :only [html h]]))
@@ -178,30 +176,6 @@
 	:subsection #{"overview" "devices"}
 	:position {"overview" :right
 		   "devices" :left})
-      (struct-map section
-	:title {"overview" "Tracks"}
-	:body (fn [s p]
-		(if (p "track")
-		  (tab-versions-to-ol s p
-				      (get-tabs-by-track (p "artist") (p "track") (p "subpage")))
-		  (tabs-to-ul s p 
-			      (filter
-			       (fn [tab]
-				 (let [tab-type (p "subpage")
-				       tab-type (if (or (nil? tab-type)
-							(= "" tab-type)
-							(= "overview" tab-type))
-						  :versions
-						  (keyword tab-type))]
-				   (tab tab-type)))
-			       (sort-by :title (get-tabs-by-artist (p "artist")))))))
-	:section "artist"
-	:subsection #{"overview" "versions" "guitar" "bass" "drum" "piano" "power" "guitar-pro"}
-	:position (fn [x] (if (or (= x "overview")
-				  (= x "")
-				  (nil? x))
-			    :right
-			    :left)))
       (struct-map section
 	:title "Debug"
 	:body (fn [session params]
