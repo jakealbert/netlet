@@ -522,12 +522,9 @@
 			"recent" (struct-map section
 				   :title (fn [s p] (str (p "userpage") "'s Tracks"))
 				   :body (fn [s p]
-					   (list
-					    (tracks-to-ol s p
-							  (get-recent-tracks (p "userpage") 25))
-					    [:div.viewmore
+					   [:div.viewmore
 					     [:a.prev {:href "prev"} "Previous 25"]
-					     [:a.next {:href "next"} "Next 25"]])))})
+					     [:a.next {:href "next"} "Next 25"]]))})
 					       ;; check if user is in DS
    "user-agreement"      (struct section
 				 "User Agreement"
