@@ -20,7 +20,7 @@ C-x C-f src/local_dev.clj
 C-c C-k
 
 Now, in the REPL,
-Type "," then "i", then "tabsfm" to enter the namespace. Then,
+Type "," then "i", then "netlet" to enter the namespace. Then,
 (start-server (var app))
 
 And open
