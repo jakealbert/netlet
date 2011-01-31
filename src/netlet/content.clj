@@ -127,11 +127,12 @@
 							  "Off"
 							  "On")
 							(str opt-val))]
-						     [:option {:value (str opt-val)} (if (= (:switch-type (second y)) :analog)
-										       (if (= opt-val 0)
-											 "Off"
-											 "On")
-										       (str opt-val))])))]
+						     [:option {:value (str opt-val)}
+						      (if (= (:switch-type (second y)) :analog)
+							(if (= opt-val 0)
+							  "Off"
+							  "On")
+							(str opt-val))])))]
 					      [:input {:type "hidden" :name "netlet" :value (md5-sum (:name x))}]
 					      [:input {:type "hidden" :name "outlet" :value (h (str (first y)))}]
 					      [:input {:type "submit" :class "update" :value "Update"}]]
