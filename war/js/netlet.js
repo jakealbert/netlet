@@ -60,8 +60,11 @@ function requestDataUpdate() {
 
 $(document).ready(function(){
 	$('form.outlet select').change(function() {
-		$("#"+$(this).attr('id')).value  =  $(this).attr('value');
-		$("#"+$(this).attr('id')+"-submit").submit();
+		var newvalue = $(this).attr('value');
+		var netlet = $("#"+$(this).attr('id')+"-netlet");
+		var outlet = $("#"+$(this).attr('id')+"-outlet");
+		var myform = $("#"+$(this).attr('id')+"-submit");
+		$.post('/set-outlet',{newvalue: newvalue, netlet: netlet.val(), outlet: outlet.val(), ajax: "true"},function(data) {		$("#"+$(this).attr('id')).value  =  data;});
 	    });
 	$('form.outlet input.update').hide();
 

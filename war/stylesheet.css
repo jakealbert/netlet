@@ -41,13 +41,13 @@ div.box {
     linear,
     left bottom,
     left top,
-    color-stop(0.03, rgb(46,33,18)),
-    color-stop(0.47, rgb(61,51,35)),
+    color-stop(0.03, #2E2112),
+    color-stop(0.55, rgb(61,51,35)),
     color-stop(1, rgb(110,98,84)));
 	background-image: -moz-linear-gradient(
     center bottom,
-    rgb(46,33,18) 3%,
-    rgb(61,51,35) 47%,
+    #2E2112 3%,
+    rgb(61,51,35) 55%,
     rgb(110,98,84) 100%);
 	padding-top: 12px;
 	color: white;

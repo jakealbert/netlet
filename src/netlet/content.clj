@@ -133,8 +133,8 @@
 							  "Off"
 							  "On")
 							(str opt-val))])))]
-					      [:input {:type "hidden" :name "netlet" :value (md5-sum (:name x))}]
-					      [:input {:type "hidden" :name "outlet" :value (h (str (first y)))}]
+					      [:input {:id (str (md5-sum (str (:name x) (:outlet-name (second y)))) "-netlet") :type "hidden" :name "netlet" :value (md5-sum (:name x))}]
+					      [:input {:id (str (md5-sum (str (:name x) (:outlet-name (second y)))) "-outlet") :type "hidden" :name "outlet" :value (h (str (first y)))}]
 					      [:input {:type "submit" :class "update" :value "Update"}]]
 						       ])
 					  (reverse (seq (:config x))))]

@@ -58,6 +58,16 @@
      session)))
 		       
 
+
+(defn json-response
+  [request params datas]
+    {:status 200
+     :headers {"Content-Type" "application/json"
+	       "Cache-Control" "no-cache, must-revalidate"
+	       "Expires" "Mon, 26 Jul 1997 05:00:00 GMT"}
+     :body (json/encode-to-str datas)})
+
+
 (defn create-netlet
   [session params]
   (if (and (session :username)
@@ -176,7 +186,7 @@
     (redirect "/login")))
 
 (defn set-outlet
-  [session params]
+  [request session params]
   (if (and (session :username)
 	   (params "netlet")
 	   (not (= "" (params "netlet")))
@@ -214,7 +224,9 @@
        (try
 	(send-message-to (deref *xmpp-connection*) messagemap)
 	(catch Exception e nil))
-       (redirect "/overview")))
+       (if (= (params "ajax") "true")
+	 (json-response request params newvalue)
+	 (redirect "/overview"))))
     (redirect "/login")))
 	  
 (defn configure-netlet
@@ -352,14 +364,6 @@
 			 netlets)]
        nl-datas)))
 
-(defn json-response
-  [request params datas]
-    {:status 200
-     :headers {"Content-Type" "application/json"
-	       "Cache-Control" "no-cache, must-revalidate"
-	       "Expires" "Mon, 26 Jul 1997 05:00:00 GMT"}
-     :body (json/encode-to-str datas)})
-
 
 (defn add-datasets-to-chart [datasets chart]
   (if (empty? datasets)
@@ -436,8 +440,8 @@
        (index session (assoc params "page" "overview")))
   (GET "/" {session :session params :params}
        (index session (assoc params "page" "overview")))
-  (POST "/set-outlet" {session :session params :params}
-	(set-outlet session params))
+  (POST "/set-outlet" {session :session params :params request :request}
+	(set-outlet request session params))
   (POST "/configure-netlet" {session :session params :params}
 	(configure-netlet session params))
   (POST "/add-trigger" {session :session params :params}
