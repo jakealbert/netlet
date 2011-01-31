@@ -1,0 +1,509 @@
+@charset "UTF-8";
+/* CSS Document */
+
+
+body {
+		background-color: rgb(200,200,200);
+		background-image: -webkit-gradient(
+		    linear,
+		    left bottom,
+		    left top,
+		    color-stop(0.80, rgb(240, 240, 240)),
+		    color-stop(1.0, rgb(120,120,120)));
+		background-image: -moz-linear-gradient(
+		    center bottom,
+		    rgb(240,240,240) 80%,
+		    rgb(120,120,120) 100%);
+		font-family: 'Nobile', arial, serif;
+		
+}
+
+div.box {
+    background-color: #E3E1DE;
+
+}
+
+#preheader {
+	background-color: white;
+	width: 950px;
+		border-left: 1px solid #999;
+		border-right: 1px solid #999;
+	height: 8px;
+}
+.container {
+	margin: 0 auto;
+	width: 950px;
+}
+
+#header, #footer {
+    background-color:  #4B4335;
+	background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.03, rgb(46,33,18)),
+    color-stop(0.47, rgb(61,51,35)),
+    color-stop(1, rgb(110,98,84)));
+	background-image: -moz-linear-gradient(
+    center bottom,
+    rgb(46,33,18) 3%,
+    rgb(61,51,35) 47%,
+    rgb(110,98,84) 100%);
+	padding-top: 12px;
+	color: white;
+	width: 100%;
+	clear: both;
+	border-top: 1px solid #222;
+}
+#logo { background: url('') no-repeat 4px 0; 
+      padding-left: 0px;
+      margin-right: -0px;
+      margin-top: -4px;
+      padding-top: 10px;
+      height: 86px;
+      }
+#header #logo a { text-decoration:none; }
+#header	h1 { font-family: 'Cardo', arial, sans-serif;
+	   font-size: 3em;
+	   padding: 0 0;
+	   margin: 0 0;
+	   }
+#header h2 { 
+    padding: 0 0;
+    margin: 0 0;
+    font-family: 'Cardo', arial, serif;
+		font-size: 1.4em;
+		color: #D1BFB0;
+}
+#header a { color: white; }
+
+#navbar, #navbar ul, #navbar ul li {
+	margin: 0;
+	padding: 0;
+}
+#navbar ul li { 
+	list-style-type: none;
+	display: inline;
+	margin-right: 3px;
+	font-size: 16px;
+	height: 24px;
+	border: 1px solid #222;
+	border-bottom: none;
+	padding: 3px 0px;
+	position: relative;
+	left: -1px;
+	top: -3px;
+}
+#navbar ul li a {
+	padding: 3px 12px;
+	text-decoration: none;
+	background-color: rgba(0, 0, 0, 0.3);
+}
+#navbar ul li a:hover {
+	background-color: rgba(40, 40, 40, 0.3);
+}
+#navbar ul li.current {
+	 	border: 1px solid #999;
+		border-bottom: 1px solid rgb(163,56,56);
+}
+#navbar ul li.current a {
+	background-color: white;
+	padding-bottom: 4px;
+	color: black;
+}
+#navbar ul li.current a:hover {
+	color: #8A2700;
+}
+
+div.box a, div.box a:hover {
+    color: #8A2700;
+}
+
+#copyright {
+	text-align: center;
+}
+#copyright a {
+	color: white;
+	text-decoration: none;
+	font-weight: bold;
+}
+#copyright a:hover {
+	text-decoration: underline;
+}
+#footer {
+	margin: 0 auto;
+	padding: 1em 0;
+}
+#footernav {
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+#footernav a{
+	text-decoration: none;
+	color: white;
+}
+#footernav a:hover {
+	text-decoration: underline;
+}
+
+#content {
+	border: 1px solid #999;
+	border-bottom: none;
+	background-color: white;
+
+}
+
+.widget {
+	background-color: #bbb;
+	border: 1px solid #999;
+}
+
+
+#userbox {
+    text-align: right;
+    background: transparent;
+}
+#userbox a {
+    text-decoration: none;
+}
+
+#userbox a:hover {
+    text-decoration: underline;
+}
+
+#userbox a.userlink {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+ul.tabbed-section {
+    padding: 0;
+}
+ul.tabbed-section li {
+    list-style-type: none;
+    margin: -1px;
+    border: 1px solid #222;
+    background-color: #E3E1DE;
+    margin-right: -29px;
+}
+ul.tabbed-section li.current {
+    background-color: rgb(46,33,18);
+}
+ul.tabbed-section li a {
+    text-decoration: none;
+    color: #222;
+    padding: 0.5em;
+    display: block;
+}
+ul.tabbed-section li a:hover {
+    background-color: rgba(209,191,176,0.3);
+    color: #2E2112;
+}
+ul.tabbed-section li.current a {
+    color: white;
+}
+ul.tabbed-section li.current a:hover {
+    background-color: inherit;
+    color: white;
+}
+
+
+
+div.tabbed-section {
+    min-height: 26em;
+    border: 1px solid #;
+    margin-top: -1px;
+    z-index: 0;
+    background-color: rgb(46,33,18);
+    color: white;
+}
+
+div.subsection {
+
+    background-color: #E3E1DE;
+    background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.10, #E3E1DE),
+    color-stop(1.0, #E3E1DE));
+    background-image: -moz-linear-gradient(
+    center bottom,
+     #E3E1DE 10%,
+    #E3E1DE  100%);
+    color: black;
+    border-top: 2px solid #ccc;
+    border-bottom: 2px solid #444;
+}
+
+div.subsection h3 {
+    color: black;
+    
+}
+
+div.widgetsubsection.colborder {
+    border-color: #555;
+}
+
+div.subsection a {
+    color: #2266cc;
+}
+
+div.tabbed-section hr {
+    color: #555;
+    background-color: #555;
+}
+div.tabbed-section h2 {
+    color: white;
+    margin-bottom: 0;
+}
+div.subsection-description {
+    color: white;
+    margin-bottom: 1.5em;
+    margin-top: 0;
+}
+
+.ui-slider {clear:both;}
+
+select {
+    background-color: #2E2112;
+    border: none;
+    color: white;
+    padding-right: 0;
+}
+
+ol.tracklist, ul.tracklist {
+    margin: 0;
+    padding: 0;
+}
+ol.tablist, ul.tablist {
+    margin: 0;
+    padding: 0;
+}
+.tracklist div.album-art {
+    float: left;
+    width: 64px;
+    height: 64px;
+    padding: 4px;
+}
+.tracklist li.track img {
+    width: 64px;
+    height: 64px;
+}
+
+.tracklist li.track {
+    clear: both;
+    position: relative;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    min-height: 72px;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    margin-top: -1px;
+}
+.tablist li.track {
+    clear: both;
+    position: relative;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    margin-top: -1px;
+}
+.tracklist li.track:nth-child(odd),
+.tablist li.track:nth-child(odd) {
+    background: rgba(255,255,255,0.6);
+}
+.tracklist li.track:nth-child(even),
+.tablist li.track:nth-child(even) {
+    background: rgba(255,255,255,0.3);
+}
+.tracklist li.track h4,
+.tablist li.track h4 {
+    margin: 0;
+    padding: 0;
+    font-size: 1.4em;
+}
+
+.tracklist div.date {
+    margin: 0.2em 0;
+}
+
+
+div.track-actions a {
+    display: inline-block;
+    background-color: #b23243;
+    margin-right: 0.5em;
+    margin-bottom: 7px;
+    padding: 5px 10px 6px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    line-height: 1;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    text-shadow: 0 -1px 1px rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    position: relative;
+    cursor: pointer;
+}
+
+div.tab-actions a {
+   display: inline-block;
+    background-color: #b23243;
+    margin-right: 0.5em;
+    margin-bottom: 7px;
+    padding: 5px 10px 6px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    line-height: 1;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    text-shadow: 0 -1px 1px rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    position: relative;
+    cursor: pointer;
+}
+
+div.action-expand {
+    display: none;
+    width: auto;
+    background-color: #444;
+    height: 86px;
+    clear: both;
+    margin-top: 5px;
+    position: relative;
+    color: white;
+    	background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.0, #222),
+    color-stop(1, #444));
+	background-image: -moz-linear-gradient(
+    center bottom,
+    #222 0%,
+    #444 100%);
+
+}
+
+div.action-expand.ae-expanded {
+    display: block;
+}
+
+
+div.action-expand-triangle {
+    border-color: transparent transparent #444 transparent;
+    border-style: solid;
+    border-width: 10px;
+    height: 0;
+    width: 0;
+    position: absolute;
+    top: -20px;
+    left: 0;
+}
+div.action-expand ul, div.action-expand ol {
+    margin: 0 auto;
+    padding: 0;
+}
+div.action-expand li {
+    list-style-type: none;
+}
+li.icon {
+    list-style-type: none;
+    display: inline-block;
+    margin: 2px;
+}
+li.icon a {
+    display: block;
+    color: white;
+    height: 72px;
+    min-width: 60px;
+    padding-top: 60px;
+    text-align: center;
+    margin: 5px 7px;
+    font-size: 0.8em;
+    text-decoration: none;
+}
+li.icon a:hover {
+    text-decoration: underline;
+}
+li.icon a.reddit {
+    background: url('/images/icons/reddit.png') no-repeat 0 0;
+}
+li.icon a.digg {
+    background: url('/images/icons/digg.png') no-repeat 0 0;
+}
+li.icon a.facebook {
+    background: url('/images/icons/facebook.png') no-repeat 0 0;
+}
+li.icon a.lastfm {
+    background: url('/images/icons/lastfm.png') no-repeat 0 0;
+}
+li.icon a.twitter {
+    background: url('/images/icons/twitter.png') no-repeat 0 0;
+}
+li.icon a.youtube {
+    background: url('/images/icons/youtube.png') no-repeat 0 0;
+}
+li.icon a.guitar {
+    background: url('/images/icons/guitar.png') no-repeat 0 0;
+}
+li.icon a.bass {
+    background: url('/images/icons/bass.png') no-repeat 0 0;
+}
+li.icon a.chords {
+    background: url('/images/icons/chords.png') no-repeat 0 0;
+}
+
+li.icon a.all {
+    background: url('/images/icons/all.png') no-repeat 0 0;
+}
+
+div.viewmore {
+    text-align: right;
+    width: auto;
+    padding-top: 1.2em;
+}
+div.viewmore a {
+    display: inline-block;
+    margin: 0;
+    text-decoration: none;
+    font-weight: bold;
+    color: white;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    position: relative;
+    cursor: pointer;
+
+}
+div.viewmore a.next {
+    padding: 7px 37px 7px 10px;
+    background: url('/images/icons/forward.png') no-repeat top right #111;
+}
+div.viewmore a.prev {
+    padding: 7px 10px 7px 37px;
+    background: url('/images/icons/back.png') no-repeat top left  #111;
+    float: left;
+}
+div.viewmore a:hover {
+    text-decoration: underline;
+}
+
+#startdate * {
+    width: 200px;
+}
+
+*, *:focus, *:active {
+    outline-color: transparent;
+}
