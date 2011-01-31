@@ -51,9 +51,9 @@
 			"<![endif]-->"))]
     [:head
      [:script {:type "text/javascript"
-	       :src "/js/jquery-1.3.2.min.js"}]
+	       :src "/js/jquery-1.4.4.min.js"}]
      [:script {:type "text/javascript"
-	       :src "/js/jquery-ui-1.7.1.custom.min.js"}]
+	       :src "/js/jquery-ui-1.8.9.custom.min.js"}]
      [:script {:type "text/javascript"
 	       :src "/js/selectToUISlider.jQuery.js"}]
      [:script {:type "text/javascript"
@@ -61,7 +61,7 @@
      [:script {:type "text/javascript"
 	       :src "/js/netlet.js"}]
      [:link {:type "text/css"
-	     :href "/css/redmond/jquery-ui-1.7.1.custom.css"
+	     :href "/css/custom-theme/jquery-ui-1.8.9.custom.css"
 	     :rel "stylesheet"}]
      [:link {:type "text/css"
 	     :href "/css/ui.slider.extras.css"
@@ -75,10 +75,11 @@
 	     :media "print"
 	     :rel "stylesheet"}]
      (when-ie
-      [:link {:type "text/css"
-	      :href "/blueprint/ie.css"
-	      :media "screen, projection"
-	      :rel "stylesheet"}])
+      (html
+       [:link {:type "text/css"
+	       :href "/blueprint/ie.css"
+	       :media "screen, projection"
+	       :rel "stylesheet"}]))
      [:link {:type "text/css"
 	     :href "/stylesheet.css"
 	     :media "screen"
@@ -108,7 +109,9 @@
    [:div.tabsection.prepend-1.span-14.append-1.colborder
     (map (fn [widget] (html [:div.box 
 			    (if (not (= "" (:title widget)))
-			      [:h3 (:title widget)])
+			      (html [:h3 (:title widget)]
+				    [:hr]))
+
 			     ((:body widget) session params)]))
 	 (filter (fn [widget] (and (not (= (:position widget) :right))
 				   (in-section-for? (params "page")
@@ -120,7 +123,8 @@
    [:div.tabsection.span-7.last
     (map (fn [widget] (html [:div.box 
 			     (if (not (= "" (:title widget)))
-			       [:h3 (:title widget)])
+			       (html [:h3 (:title widget)]
+				     [:hr]))
 			     ((:body widget) session params)]))
 	 (filter (fn [widget] (and (= (:position widget) :right)
 				   (in-section-for? (params "page")
@@ -318,7 +322,8 @@
      [:div#header
       [:div.container
        [:div#logo.span-16.prepend-top
-	[:h1 [:a {:href "/"} "Netlets: Network-Enabled Power Outlets"]]]
+	[:h1 [:a {:href "/"} "Netlets"]]
+	[:h2 "Network-Enabled Power Outlets"]]
        [:div#userbox.prepend-1.span-7.last.box
 	(let [logged-in (session :username)]
 	  (if logged-in
