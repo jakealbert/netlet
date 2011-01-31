@@ -114,21 +114,30 @@
 					     [:span (h (:outlet-name (second y)))
 					      " "
 					      [:a {:href (str "/triggers/" (md5-sum (:name x)) "/" (md5-sum (:outlet-name (second y))))} "[triggers]"]]
-					     [:form {:method "post" :action "/set-outlet"}
-					      [:select {:name "newvalue"}
+					     [:form {:id (str (md5-sum (str (:name x) (:outlet-name (second y)))) "-submit") :class "outlet" :method "post" :action "/set-outlet"}
+					      [:select {:id (md5-sum (str (:name x) (:outlet-name (second y)))) :name "newvalue" }
 					       (let [switch-props (netlet-switch-properties (:switch-type (second y)))
 						     min-val (:min-value switch-props)
 						     max-val (:max-value switch-props)]
 						 (for [opt-val (range min-val (inc max-val))]
 						   (if (= opt-val (:value (second y)))
-						     [:option {:value (str opt-val) :selected "selected"} (str opt-val)]
-						     [:option {:value (str opt-val)} (str opt-val)])))]
+						     [:option {:value (str opt-val) :selected "selected"}
+						      (if (= (:switch-type (second y)) :analog)
+							(if (= opt-val 0)
+							  "Off"
+							  "On")
+							(str opt-val))]
+						     [:option {:value (str opt-val)} (if (= (:switch-type (second y)) :analog)
+										       (if (= opt-val 0)
+											 "Off"
+											 "On")
+										       (str opt-val))])))]
 					      [:input {:type "hidden" :name "netlet" :value (md5-sum (:name x))}]
 					      [:input {:type "hidden" :name "outlet" :value (h (str (first y)))}]
-					      [:input {:type "submit" :value "Update"}]]
+					      [:input {:type "submit" :class "update" :value "Update"}]]
 						       ])
 					  (reverse (seq (:config x))))]
-				    [:br]]) netlets)]
+				    [:br]])  (sort-by :name netlets))]
 		     [:p.alt "You have no devices set up."]))))
 	:section "overview"
 	:auth-level :user)
@@ -344,7 +353,7 @@
 					   triggeroutlet ((:config triggernetlet) (:trigger-outlet trigger))
 					   triggeroname (:outlet-name triggeroutlet)]
 				       [:li 
-					"Turn this outlet "
+					"Set this outlet to "
 					(if (> (:newval trigger) 0) [:strong "on"] [:strong "off"])
 					" when "
 					[:strong triggernname]
@@ -374,7 +383,7 @@
 				 [:div.prepend-1
 				  [:form {:method "post" :action "/add-trigger"}
 				   [:p
-				    "Turn this outlet "
+				    "Set this outlet to "
 				    [:select {:name "onoff"}
 				     [:option {:value "on"} "on"]
 				     [:option {:value "off"} "off"]]
