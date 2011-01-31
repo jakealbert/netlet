@@ -5,7 +5,7 @@
 	[clj-time.format]
 	[hiccup :only [html h]]))
 
-(def site-title "Netlet")
+(def site-title "Netlets")
 
 (def outlet-set (partial sorted-set-by (fn [x y] (< (:outlet x) (:outlet y)))))
 
