@@ -110,7 +110,7 @@
     (map (fn [widget] (html [:div.box 
 			    (if (not (= "" (:title widget)))
 			      (html [:h3 (:title widget)]
-				    [:hr]))
+				    [:hr.section]))
 
 			     ((:body widget) session params)]))
 	 (filter (fn [widget] (and (not (= (:position widget) :right))
@@ -124,7 +124,7 @@
     (map (fn [widget] (html [:div.box 
 			     (if (not (= "" (:title widget)))
 			       (html [:h3 (:title widget)]
-				     [:hr]))
+				     [:hr.section]))
 			     ((:body widget) session params)]))
 	 (filter (fn [widget] (and (= (:position widget) :right)
 				   (in-section-for? (params "page")

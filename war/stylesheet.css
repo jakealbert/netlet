@@ -254,6 +254,20 @@ div.tabbed-section hr {
     color: #555;
     background-color: #555;
 }
+
+hr.section {
+    background-color: #555;
+    background-color: rgba(85,85,85,0.5);
+    
+}
+div.colborder {
+    border-color: #555;
+    border-color: rgba(85,85,85,0.4);
+    margin-bottom: 1.6em;
+    padding-top: 1.4em;
+}
+
+
 div.tabbed-section h2 {
     color: white;
     margin-bottom: 0;
