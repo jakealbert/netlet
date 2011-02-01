@@ -109,8 +109,7 @@
    [:div.tabsection.prepend-1.span-14.append-1.colborder
     (map (fn [widget] (html [:div.box 
 			    (if (not (= "" (:title widget)))
-			      (html [:h3 (:title widget)]
-				    [:hr.section]))
+			      [:h3 (:title widget)])
 
 			     ((:body widget) session params)]))
 	 (filter (fn [widget] (and (not (= (:position widget) :right))
@@ -123,8 +122,7 @@
    [:div.tabsection.span-7.last
     (map (fn [widget] (html [:div.box 
 			     (if (not (= "" (:title widget)))
-			       (html [:h3 (:title widget)]
-				     [:hr.section]))
+			       [:h3 (:title widget)])
 			     ((:body widget) session params)]))
 	 (filter (fn [widget] (and (= (:position widget) :right)
 				   (in-section-for? (params "page")

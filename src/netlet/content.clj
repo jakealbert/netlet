@@ -338,7 +338,7 @@
 				    outletnum (first (first (filter (fn [x] (= (md5-sum (:outlet-name (second x))) (p "outlethash"))) (seq (:config netlet)))))
 				    outletname (:outlet-name outlet)]
 				(centered-section
-				 (html (str (h outletname) " Triggers ")
+				 (html (str (h netletname) "/" (h outletname) " Triggers ")
 				       [:a {:href (str "/add-trigger/"
 						       (p "namehash")
 						       "/"
@@ -355,7 +355,9 @@
 					   triggeroname (:outlet-name triggeroutlet)]
 				       [:li 
 					"Set this outlet to "
-					(if (> (:newval trigger) 0) [:strong "on"] [:strong "off"])
+					(if (= :analog (:switch-type outlet))
+					  (if (> (:newval trigger) 0) [:strong "on"] [:strong "off"])
+					  [:strong (:newval trigger)])
 					" when "
 					[:strong triggernname]
 					"/"
@@ -386,8 +388,16 @@
 				   [:p
 				    "Set this outlet to "
 				    [:select {:name "onoff"}
-				     [:option {:value "on"} "on"]
-				     [:option {:value "off"} "off"]]
+				     (if (= (:switch-type outlet)
+					    :analog)
+				       (html
+					[:option {:value "on"} "on"]
+					[:option {:value "off"} "off"])
+				       (let [switch-props (netlet-switch-properties (:switch-type outlet))
+					     min-val (:min-value switch-props)
+					     max-val (:max-value switch-props)]
+					 (for [opt-val (range min-val (inc max-val))]
+					   [:option {:value (str opt-val)} (str opt-val)])))]
 				    " when "
 				    [:select {:name "outlet"}
 				     
@@ -408,10 +418,10 @@
 								  (map :outlet-name (vals (:config anetlet)))))]
 					       (html
 						[:option {:value (str (md5-sum (:name anetlet)) (md5-sum aoutlet))} aoutlet]))])))]
-				    " turns "
+				    " spikes "
 				    [:select {:name "triggeronoff"}
-				     [:option {:value "on"} "on"]
-				     [:option {:value "off"} "off"]]
+				     [:option {:value "up"} "up"]
+				     [:option {:value "down"} "down"]]
 				    "."
 				    ]
 				   [:p

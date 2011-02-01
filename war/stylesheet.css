@@ -114,6 +114,12 @@ div.box {
 #navbar ul li.current a:hover {
 	color: #8A2700;
 }
+div.box ul {
+    margin-right: 0;
+    margin-bottom: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+}
 
 div.box a, div.box a:hover {
     color: #8A2700;
@@ -285,6 +291,8 @@ select {
     border: none;
     color: white;
     padding-right: 0;
+    border-radius: 3px;
+    
 }
 
 ol.tracklist, ul.tracklist {
