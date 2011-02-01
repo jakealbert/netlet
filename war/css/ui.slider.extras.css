@@ -102,11 +102,11 @@ span.ttcontent {
 }
 .ui-slider li span.ui-widget-content, .ui-slider dd span.ui-widget-content {
 	border-right: 0;
-	border-left-width: 2px;
+	border-left-width: 1px;
 	border-left-style: solid;
 	border-top: 0;
 	border-bottom: 0;
-	border-color: #D1BFB0;
+	border-color: #E3E1DE;
 }
 .ui-slider .first .ui-slider-tic, .ui-slider .last .ui-slider-tic {
 	display: none;

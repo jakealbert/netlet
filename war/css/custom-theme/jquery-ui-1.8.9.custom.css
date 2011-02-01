@@ -59,9 +59,9 @@
 .ui-widget { font-family: 'Nobile', arial, sans-serif; font-size: 1.3em; }
 .ui-widget .ui-widget { font-size: 1em; }
 .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-family: 'Nobile', arial, sans-serif; font-size: 1em; }
-.ui-widget-content { border: 2px solid #E3E1DE; background: #2e2112; color: white; }
+.ui-widget-content { border: 1px solid #E3E1DE; background: #2e2112; color: white; }
 .ui-widget-content a { color: #ffffff; }
-.ui-widget-header { border: 2px solid #E3E1DE; background: #8a2700; color: #ffffff; font-weight: bold; }
+.ui-widget-header { border: 1px solid #E3E1DE; background: #8a2700; color: #ffffff; font-weight: bold; }
 .ui-widget-header a { color: #ffffff; }
 
 /* Interaction states
@@ -76,9 +76,9 @@
 
 /* Interaction Cues
 ----------------------------------*/
-.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight  {border: 2px solid #E3E1DE; color: #222; }
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight  {border: 1px solid #E3E1DE; color: #222; }
 .ui-state-highlight a, .ui-widget-content .ui-state-highlight a,.ui-widget-header .ui-state-highlight a { color: #222; }
-.ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error {border: 2px solid #E3E1DE; color: #ffffff; }
+.ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error {border: 1px solid #E3E1DE; color: #ffffff; }
 .ui-state-error a, .ui-widget-content .ui-state-error a, .ui-widget-header .ui-state-error a { color: #ffffff; }
 .ui-state-error-text, .ui-widget-content .ui-state-error-text, .ui-widget-header .ui-state-error-text { color: #ffffff; }
 .ui-priority-primary, .ui-widget-content .ui-priority-primary, .ui-widget-header .ui-priority-primary { font-weight: bold; }
