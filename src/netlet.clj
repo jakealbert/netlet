@@ -115,12 +115,12 @@
 					   triggernetletseq)))
 	  
 	  usertriggers (:triggers userdata)
-	  edge         (if (= (params "triggeronoff") "on")
+	  edge         (if (= (params "triggeronoff") "up")
 			 :rising
 			 :falling)
-	  newval       (if (= (params "onoff") "on")
-			 1
-			 0)
+	  newval       (cond (= (params "onoff") "on") 1
+			     (= (params "onoff") "off") 0
+			     :else (Integer/parseInt (params "onoff")))
 	  
 	  newuserdata  (if usertriggers
 			 (assoc userdata :triggers (cons {:netlet netlethash :outlet outletnum :trigger-netlet outlethash :trigger-outlet triggernum :edge edge :newval newval }
