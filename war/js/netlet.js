@@ -68,6 +68,7 @@ $(document).ready(function(){
 	    });
 	$('form.outlet input.update').hide();
 
+
 	$('li.track').click(function(){
 		$('div.ae-expanded').slideUp("fast").removeClass("ae-expanded");
 	    });

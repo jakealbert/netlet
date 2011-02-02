@@ -1,5 +1,6 @@
 (ns netlet.xmpp
-  (:use [netlet.util :only [*users-map*]])
+  (:use [netlet.util :only [*users-map*]]
+	[hiccup :only [html h]])
   (:require [clojure.xml :as xml])
   (:require [clojure.zip :as zip])
   (:require [clojure.contrib.zip-filter.xml :as zf])
@@ -262,12 +263,19 @@
 (defn send-message-to
   [conn message]
   (cond
-   (is-app-engine?)	nil ;	 (.sendMessage conn
-			;		       (let [mb (MessageBuilder.)
-			;			     jd (JID. (:to message))]
-			;			 (.withRecipientJids mb (into-array [jd]))
-			;			 (.withFromJid mb (JID. "mynetlet@appspot.com"))
-			;			 (.withBody mb (str message))
-			;			 (.build mb)))
+   (is-app-engine?)	(.sendMessage conn
+				      (let [mb (MessageBuilder.)
+					    jd (JID. (:to message))]
+					(.withRecipientJids mb (into-array [jd]))
+					(.withFromJid mb (JID. "mynetlet@appspot.com"))
+					(.asXml true)
+					(.withBody mb 
+						   (html
+						    [:property {:name "username" :value (:username message)}]
+						    [:property {:name "netlet-name" :value (:netlet-name message)}]
+						    [:property {:name "outlet-type" :value (str (:outlet-type message))}]
+						    [:property {:name "outlet-num" :value (:outlet-num message)}]
+						    [:property {:name "value" :value (:value message)}]))
+					(.build mb)))
    (is-localhost?) (.sendPacket conn (create-message-packet  message))))
 
