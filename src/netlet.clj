@@ -8,9 +8,9 @@
 	[netlet.templates :only [layout]]
 	[netlet.content :only [site-title sections netlet-switch-properties netlet-model-properties]]
 	[netlet.util :only [section *users-map* flatten get-now md5-sum]]
-	[netlet.xmpp :only [*xmpp-connection* send-message-to get-xmpp-connection]]
+	[netlet.xmpp :only [*xmpp-connection* send-message-to]]
 	[hiccup :only [html]]
-	[incanter core stats charts]
+	[incanter core stats]
 	local-dev
 	compojure.core
 	ring.middleware.session
@@ -365,46 +365,33 @@
        nl-datas)))
 
 
-(defn add-datasets-to-chart [datasets chart]
-  (if (empty? datasets)
-    chart
-    (let [data (first datasets)
-	  title (:name data)
-	  datas (:data data)
-	  times (map first datas)
-	  vals  (map second datas)]
-      (add-datasets-to-chart (rest datasets) (add-lines* chart times vals :series-label (str title))))))
-	  
-
 (defn png-response
   [request params datas]
-  (let
-      [firstdata (first datas)
-       restdata  (rest datas)
-       title (:name firstdata)
-       datas (:data firstdata)
-       times (map first datas)
-       vals  (map second datas)
-       chart (clear-background (xy-plot times vals
-					:legend true
-					:series-label title
-					:title ""
-					:y-label (let [charttype (keyword (params "charttype"))]
-						   (cond (= charttype :current) "Current (A)"
-							 (= charttype :power) "Power (kW)" :else "Measurement"))
-					:x-label "Time"))
-       chart (add-datasets-to-chart restdata chart)
-       out-stream (ByteArrayOutputStream.)
-       in-stream (do
-		   (if (not= (params "size") "ss")
-		     (save chart out-stream :width 674 :height 300)
-		     (save chart out-stream :width 394 :height 200))
-		   (ByteArrayInputStream.
-		    (.toByteArray out-stream)))
-       header {:status 200
-	       :headers {"Content-Type" "image/png"}
-	       :body in-stream}]
-    header))
+  (let [titlelist (map :name datas)
+	titlestr  (apply str (interpose "|" titlelist))
+	datastrings (map (fn [dataset]
+			   (let [timestamps (map first dataset)
+				 timestampstr (apply str (interpose "," timestamps))
+				 data (map second dataset)
+				 datastr (apply str (interpose "," data))]
+			     (str timestamps "|" datastr)))
+			 datas)
+	datastr   (apply str (interpose "|" datastrings))
+	charttype (keyword (params "charttype"))]
+    (redirect (str "https://chart.googleapis.com/chart?cht=lc&chs=" 
+		   (if (not= (params "size") "ss") "674" "394") 
+		   "x"
+		   (if (not= (params "size") "ss") "300" "200")
+		   "&chxt=x,x,y,y&chxl=1:|Time|3:|"
+		   (cond (= charttype :current) "Current (A)"
+			 (= charttype :power) "Power (kW)"
+			 :else "Measurement")
+		   "&chxp=1,50|3,50&chf=bg,s,E3E1DE"
+		   "&chdl=" titlestr
+		   "&chd=t:" datastr
+		   
+		   ))))
+	
 
 
 (defn chart-response
