@@ -145,8 +145,9 @@
       (struct-map section
 	:title "Power Usage Ticker"
 	:body (fn [session params]
-		[:div#chart-container
-		 ])
+		[:div#ticker-chart-container
+		 {:style
+		  "width: 510px; height: 400px;"}])
 	:section "overview"
 	:auth-level :user)
       (struct-map section
@@ -157,31 +158,70 @@
 	:position :right
 	:auth-level :user)
       (struct-map section
-	:title (fn [] "Power Usage History" )
-	:long-tile ""
-	:body (fn [s p] [:div#power-chart-container {:style 
-						     (if (not= (p "subpage") "power")
-						       "width: 394px; height: 200px;"
-						       "width: 674px; height: 300px")}
-			 (if (not= (p "subpage") "power")
-			   [:img {:src "/charts/power.png?size=ss"}]
-			   [:img {:src "/charts/power.png"}])])
+	:title (fn [s p] (if (not= (p "subpage") "power")
+			   "Power Usage History"
+			   nil))
+	:body (fn [s p]
+		[:div#power-chart-container
+		 {:style 
+		  (if (not= (p "subpage") "power")
+		    "width: 394px; height: 200px;"
+		    "width: 674px; height: 300px")}
+		 (let [dt (now)
+		       thisweek (dt-since-epoch dt)
+		       lastweekdt (minus dt (weeks (if (= (p "subpage") "overview") 1 4)))
+		       lastweek (dt-since-epoch lastweekdt)
+		       size    (if (not= (p "subpage") "power")
+				 "&size=ss"
+				 "")
+		       imgurl (str "/charts/power.png?startdt=" lastweek "&enddt=" thisweek size)]
+		   [:img {:src imgurl}])])
 	:section "charts"
 	:subsection #{"overview" "power"})
       (struct-map section
-	:title "Current Draw History"
-	:body (fn [s p] [:div])
+	:title (fn [s p] (if (not= (p "subpage") "current")
+			   "Current Draw History"
+			   nil))
+	:body (fn [s p] 
+		[:div#current-chart-container
+		 {:style (if (not= (p "subpage") "current")
+			   "width: 394px; height: 200px;"
+			   "width: 764px; height: 300px;")}
+		 (let [dt (now)
+		       thisweek (dt-since-epoch dt)
+		       lastweekdt (minus dt (weeks (if (= (p "subpage") "overview") 1 4)))
+		       lastweek (dt-since-epoch lastweekdt)
+		       size    (if (not= (p "subpage") "current")
+				 "&size=ss"
+				 "")
+		       imgurl (str "/charts/current.png?startdt=" lastweek "&enddt=" thisweek size)]
+		    [:img {:src imgurl}])])
 	:section "charts"
 	:subsection #{"overview" "current"})
+;      (struct-map section
+;	:title "Apparent Power History"
+;	:body (fn [s p] [:div])
+;	:section "charts"
+;	:subsection #{"overview" "ap"}
+;	:position :left)
       (struct-map section
-	:title "Apparent Power History"
-	:body (fn [s p] [:div])
-	:section "charts"
-	:subsection #{"overview" "ap"}
-	:position :left)
-      (struct-map section
-	:title "Device Breakdown"
-	:body (fn [s p] [:div])
+	:title (fn [s p]
+		 (if (not= (p "subpage") "devices")
+		   "Device Breakdown"
+		   nil))
+	:body (fn [s p] [:div#devices-chart-container
+			 {:style (if (not= (p "subpage") "devices")
+				   "width: 300px; height: 400px;"
+				   "width: 764px; height: 300px;")}
+		 (let [dt (now)
+		       thisweek (dt-since-epoch dt)
+		       lastweekdt (minus dt (weeks (if (= (p "subpage") "overview") 1 4) ))
+		       lastweek (dt-since-epoch lastweekdt)
+		       size    (if (not= (p "subpage") "devices")
+				 "&size=ss-right"
+				 "")
+		       imgurl (str "/charts/devices.png?startdt=" lastweek "&enddt=" thisweek size)]
+		    [:img {:src imgurl}])])
 	:section "charts"
 	:subsection #{"overview" "devices"}
 	:position {"overview" :right
@@ -195,7 +235,7 @@
 		       (str (assoc params "password" "******"))
 		       (str params))]))
 	:position :right
-	:auth-level :admin)))
+	:auth-level :admsin)))
 
 (def sections {})
 	       
@@ -212,21 +252,20 @@
 					 (struct section "Overview" "overview")
 					 (struct section "Current" "current")
 					 (struct section "Power" "power")
-					 (struct section "Apparent Power" "ap")
+					; (struct section "Apparent Power" "ap")
 					 (struct section "Devices" "devices"))
 					((var sections) "charts")))
 		:subsections
 		(let [calendar-description-fn (fn [s p]
 						(let [dt (now)
-						      pastsun (minus dt (days (day-of-week dt)))
-						      pastsun2 (minus pastsun (weeks 4))
+						      lastweek (minus dt (weeks (if (= (p "subpage") "overview") 1 4)))
 						      fmt (formatter "dd-MM-YYYY")
 						      date1       (html
 								   (get-calendar-html "startdate"
-										      (unparse fmt pastsun2)))
+										      (unparse fmt lastweek)))
 						      date2       (html
 								   (get-calendar-html "enddate"
-										      (unparse fmt pastsun)))]
+										      (unparse fmt dt)))]
 						 (html
 						  [:form {:method "POST" :action "#"}
 						   [:formset
@@ -236,17 +275,16 @@
 						    date2]])))
 		      overview-description-fn (fn [s p]
 						(let [dt (now)
-						      pastsun (minus dt (days (day-of-week dt)))
-						      pastsun2 (minus pastsun (weeks 1))
+						      lastweek (minus dt (weeks 1))
 						      fmt (formatter "EEEE dd MMMM YYYY")
 						      datestr (str "For the week of "
-								   (unparse fmt pastsun2)
+								   (unparse fmt lastweek)
 								   " to "
-								   (unparse fmt pastsun))]
+								   (unparse fmt dt))]
 						  datestr))]
 		  {"overview" (struct-map section
 				:title "Overview"
-				:long-title "Weekly Current, Power, and AP Charts"
+				:long-title "Weekly Current, Power, and Breakdown Charts"
 				:description overview-description-fn
 				:body (fn [session params] 
 					(widget-subsection
@@ -266,13 +304,13 @@
 					   (widget-subsection-full
 					    session
 					    params widgets)))
-		   "ap"  (struct-map section
-				   :title "Apparent Power History"
-				   :description calendar-description-fn
-				   :body  (fn [session params] 
-					   (widget-subsection-full
-					    session
-					    params widgets)))
+		 ;  "ap"  (struct-map section
+		;		   :title "Apparent Power History"
+		;		   :description calendar-description-fn
+		;		   :body  (fn [session params] 
+		;			   (widget-subsection-full
+		;			    session
+		;			    params widgets)))
 		   "devices"       (struct-map section
 				   :title "Device Breakdown"
 				   :description calendar-description-fn

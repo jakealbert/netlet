@@ -106,7 +106,7 @@
 (defn widget-section
   [session params widgets]
   (html
-   [:div.tabsection.prepend-1.span-14.append-1.colborder
+   [:div.tabsection.prepend-1.span-14.append-1.colborder.append-bottom
     (map (fn [widget] (html [:div.box 
 			    (if (not (= "" (:title widget)))
 			      [:h3 (:title widget)])
@@ -160,6 +160,9 @@
 		widget-title (if (map? widget-title)
 			       (widget-title (params "subpage"))
 			       widget-title)
+		widget-title (if (fn? widget-title)
+			       (widget-title session params)
+			       widget-title)
 		widget-title (cond
 			      (nil? widget-title) nil
 			      (= widget-title "") nil
@@ -194,11 +197,13 @@
 		widget-title (if (map? widget-title)
 			       (get widget-title (params"subpage") (val (first (:title widget))))
 			       widget-title)
+		widget-title (if (fn? widget-title)
+			       (widget-title session params)
+			       widget-title)
 		widget-title (cond 
 			      (nil? widget-title) nil
 			      (= widget-title "") nil
 			      (string? widget-title) [:h3 widget-title]
-			      (fn? widget-title) nil
 			      :else nil)
 		bodyout (if (nil? widget-title)
 			  [:div.box.subsection

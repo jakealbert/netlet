@@ -318,6 +318,13 @@
   (GET "/admin/*" {session :session params :params}
        (index session params)))
 
+(defn get-every-n-of
+  [cnt n data]
+  (cond
+   (empty? data) data
+   (= n cnt) (cons (first data) (get-every-n-of 0 n (rest data)))
+   :else (get-every-n-of (+ 1 cnt) n (rest data))))
+
 (defn get-netlet-data
   ([username datatype n]
      nil)
@@ -326,6 +333,8 @@
   ([username datatype n netlet outlet]
      nil)
   ([username datatype startdt enddt netlet outlets]
+     (get-netlet-data username datatype startdt enddt netlet outlets 25))
+  ([username datatype startdt enddt netlet outlets n]
      (let [usermap     ((var *users-map*) username)
 	   usernetlets (usermap :netlets)
 	   netlet      (cond
@@ -342,8 +351,8 @@
 			(or (nil? outlets)
 			    (and
 			     (seq? outlets)
-			     (empty? outlets)))  (keys nl-conf)
-			(seq? outlets) outlets
+			     (empty? outlets)))  (set (keys nl-conf))
+			(seq? outlets) (seq outlets)
 			(integer? outlets) (list outlets))
 	   netlets      (vals (select-keys nl-conf nl-keys))
 	   nl-datas     (map
@@ -352,60 +361,95 @@
 			    :data
 			    (let [nl-data (:data nl)
 				  nl-data (filter (fn [datum]
-						    (and
-						     (> (:timestamp datum) startdt)
-						     (< (:timestamp datum) enddt)))
-						  (seq nl-data))
+						    (> (:timestamp datum) startdt))
+						  nl-data)
+				  nl-data (filter (fn [datum]
+						    (< (:timestamp datum) enddt))
+						  nl-data)
+				  
 				  nl-data (map (fn [datum]
 						 [(:timestamp datum) (datatype datum)])
 					       nl-data)]
-			      nl-data)
+			      (get-every-n-of 0 (int (/ (length nl-data) n)) nl-data))
 			    :marker {:enabled false}})
 			 netlets)]
-       nl-datas)))
+       (sort-by :name nl-datas))))
 
+
+(defn datas-as-chart-string
+  [dataset]
+  (let [data (:data dataset)
+	timestamps (map first data)
+	timestampstr (apply str (interpose "," timestamps))
+	datas (map second data)
+	datastr (apply str (interpose "," datas))]
+    (str timestampstr "|" datastr )))
+
+(defn datas-as-pie-string
+  [all-datasets]
+  (let [datasets (map (fn [x]
+			(map second (:data x)))
+		      all-datasets)
+	sumdatasets (reduce + 0 datasets)
+	fractions   (map (fn [x] (* 100 (/ x sumdatasets))) datasets)]
+    (str sumdatasets)))
+	
+	
 
 (defn png-response
   [request params datas]
   (let [titlelist (map :name datas)
 	titlestr  (apply str (interpose "|" titlelist))
-	datastrings (map (fn [dataset]
-			   (let [timestamps (map first dataset)
-				 timestampstr (apply str (interpose "," timestamps))
-				 data (map second dataset)
-				 datastr (apply str (interpose "," data))]
-			     (str timestamps "|" datastr)))
-			 datas)
+	datastrings (map datas-as-chart-string datas)
 	datastr   (apply str (interpose "|" datastrings))
 	charttype (keyword (params "charttype"))]
-    (redirect (str "https://chart.googleapis.com/chart?cht=lc&chs=" 
-		   (if (not= (params "size") "ss") "674" "394") 
-		   "x"
-		   (if (not= (params "size") "ss") "300" "200")
-		   "&chxt=x,x,y,y&chxl=1:|Time|3:|"
-		   (cond (= charttype :current) "Current (A)"
-			 (= charttype :power) "Power (kW)"
-			 :else "Measurement")
-		   "&chxp=1,50|3,50&chf=bg,s,E3E1DE"
+    (if (= charttype :devices)
+      (redirect (str "https://chart.googleapis.com/chart?cht=p&chs="
+		     (cond (= (params "size") "ss") "394"
+			   (= (params "size") "ss-right") "194"
+			   :else "674")
+		     "x"
+		     (cond (= (params "size") "ss") "200"
+			   (= (params "size") "ss-right") "400"
+			   :else "300")
+		     "&chco=8D361A,BE6F2D,E3BE4B,9CAA3B,43621E"
+		   "&chf=bg,s,E3E1DE"
 		   "&chdl=" titlestr
-		   "&chd=t:" datastr
-		   
-		   ))))
+		   "&chd=t:" (datas-as-pie-string datas)))
+      (redirect (str "https://chart.googleapis.com/chart?cht=lc&chs=" 
+		     (cond (= (params "size") "ss") "394"
+			   (= (params "size") "ss-right") "194"
+			   :else "674")
+		     "x"
+		     (cond (= (params "size") "ss") "200"
+			   (= (params "size") "ss-right") "400"
+			   :else "300")
+		     "&chxt=x,x,y,y&chxl=1:|Time|3:|"
+		     (cond (= charttype :current) "Current (A)"
+			   (= charttype :power) "Power (kW)"
+			   :else "Measurement")
+		     "&chco=8D361A,BE6F2D,E3BE4B,9CAA3B,43621E"
+		     "&chxp=1,50|3,50&chf=bg,s,E3E1DE"
+		     "&chdl=" titlestr
+		     "&chd=t:" datastr
+		     
+		     )))))
 	
 
 
 (defn chart-response
   [request session params]
-  (if (:username session)
+  (if (and (:username session)
+	   ((var *users-map*) (:username session)))
     (let [username (:username session)
 	  datatype (if (params "charttype")
 		     (keyword (params "charttype"))
 		     :current)
 	  startdt  (if (params "startdt")
-		     (Integer/parseInt (params "startdt"))
+		     (Long/parseLong (params "startdt"))
 		     0)
 	  enddt    (if (params "enddt")
-		     (Integer/parseInt (params "enddt"))
+		     (Long/parseLong (params "enddt"))
 		     (get-now))
 	  netlet   (if (params "netlet")
 		     (params "netlet")
@@ -415,8 +459,11 @@
 			     (map #(try (Integer/parseInt %)
 					(catch Exception e nil))
 				  (seq (.split (params "outlets") ","))))
-		     1)
-	  chart-data (get-netlet-data username datatype startdt enddt netlet outlets)]
+		     nil)
+	  numpoints (if (params "n")
+		      (Integer/parseInt (params "n"))
+		      25)
+	  chart-data (get-netlet-data username datatype startdt enddt netlet outlets numpoints)]
       (cond
        (= (params "extension") "png") (png-response request params chart-data)
        (= (params "extension") "json") (json-response request params chart-data)))

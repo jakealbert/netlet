@@ -162,7 +162,7 @@
 							  :sensor-data)]
 					       (let [sensorattrs (:attrs sensortag)]
 						 (assoc sensorattrs 
-						   :timestamp (Integer/parseInt (:timestamp sensorattrs))
+						   :timestamp (Long/parseLong (:timestamp sensorattrs))
 						   :current (Double/parseDouble (:current sensorattrs))
 						   :power (Double/parseDouble (:power sensorattrs)))))]
 			       {:outlet-num (Integer/parseInt outlet-num) :switch-type (keyword type) :value (Integer/parseInt value) :data outletdata}))

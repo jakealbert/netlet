@@ -95,7 +95,7 @@
 
 (defn unixtime
   [dt]
-  (* 1000 (in-secs (interval (epoch) dt))))
+  (* (in-secs (interval (epoch) dt))))
 
 (defn get-calendar-select
   [alod selected-date] 
@@ -121,7 +121,7 @@
 		      selected-date))))
 
 (defn get-calendar-dates
-  ([now-dt] (get-calendar-dates (minus now-dt (days (day-of-week now-dt))) '()))
+  ([now-dt] (get-calendar-dates now-dt '()))
   ([enddate acc]
      (let [startdate (date-time 2010 6 01)]
        (if (after? enddate startdate)
@@ -189,4 +189,8 @@
 
 (defn get-now
   []
-  (* 1000 (in-secs (interval (epoch) (now)))))
+  (in-secs (interval (epoch) (now))))
+
+(defn dt-since-epoch
+  [dt]
+  (in-secs (interval (epoch) dt)))
